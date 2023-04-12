@@ -1,4 +1,6 @@
-﻿include("InstanceManager");
+print("Loading mainmenu.lua from Better FrontEnd (UI)");
+
+include("InstanceManager");
 include("LobbyTypes"); --MPLobbyMode
 
 include("PlayerSetupLogic"); -- For PlayNow
@@ -715,17 +717,17 @@ function UpdateMultiplayerButton(buttonControl: table)
 	if(m_multiplayerButton ~= nil) then
 		if (seenXPM == nil or seenXPM == 0) then
 			m_multiplayerButton.Top:SetToolTipString(MultiplayerButtonNewMPModeTTStr .. "[NEWLINE][NEWLINE]" .. MultiplayerButtonTTStr);
-			m_multiplayerButton.ButtonLabel:SetText(Locale.Lookup("LOC_PLAY_MULTIPLAYER_NEW_MP_MODE"));
+			m_multiplayerButton.ButtonLabel:SetText(Locale.Lookup("LOC_PLAY_MULTIPLAYER_NEW_MP_MODE").."   [ICON_List]");
 		elseif (m_cloudNotify ~= CloudNotifyTypes.CLOUDNOTIFY_NONE and m_cloudNotify ~= CloudNotifyTypes.CLOUDNOTIFY_ERROR) then
 			local cloudTTStr = GetMPButtonTTForNotify(m_cloudNotify);
 			m_multiplayerButton.Top:SetToolTipString(cloudTTStr);
-			m_multiplayerButton.ButtonLabel:SetText(Locale.Lookup("LOC_PLAY_MULTIPLAYER_HAVE_CLOUD_NOTIFY"));
+			m_multiplayerButton.ButtonLabel:SetText(Locale.Lookup("LOC_PLAY_MULTIPLAYER_HAVE_CLOUD_NOTIFY").."   [ICON_List]");
 		elseif (m_hasCloudUnseenComplete) then
 			m_multiplayerButton.Top:SetToolTipString(MultiplayerButtonUnseenCompleteTTStr .. "[NEWLINE][NEWLINE]" .. MultiplayerButtonTTStr);
-			m_multiplayerButton.ButtonLabel:SetText(Locale.Lookup("LOC_PLAY_MULTIPLAYER_UNSEEN_COMPLETE_GAME"));
+			m_multiplayerButton.ButtonLabel:SetText(Locale.Lookup("LOC_PLAY_MULTIPLAYER_UNSEEN_COMPLETE_GAME").."   [ICON_List]");
 		else
 			m_multiplayerButton.Top:SetToolTipString(MultiplayerButtonTTStr);
-			m_multiplayerButton.ButtonLabel:SetText(Locale.Lookup("LOC_PLAY_MULTIPLAYER"));
+			m_multiplayerButton.ButtonLabel:SetText(Locale.Lookup("LOC_PLAY_MULTIPLAYER").."   [ICON_List]");
 		end
 
 		m_multiplayerButton.OptionButton:SetEnabled(UI.HasFeature("Multiplayer"));
@@ -962,11 +964,12 @@ local m_MultiPlayerSubMenu :table = {
 								{label = "LOC_MULTIPLAYER_MATCHMAKE_PIRATES",	callback = GetOnMatchMakeFunction(OPTION_SEEN_PIRATES_INTRO, StartPiratesMatchMaking, LuaEvents.MainMenu_ShowPiratesIntro),	tooltip = "LOC_MULTIPLAYER_MATCHMAKE_PIRATES_TT", colorName = "PiratesButtonCS",  helpCallback = OnPiratesHowToPlay, helpTooltip = "LOC_MULTIPLAYER_HOWTOPLAY_PIRATES_TT", buttonState = GetHowToButtonUpdateFunction(m_howToPiratesControl, MOD_PIRATES_GUID)}
 							};
 
-local m_AdditionalSubMenu :table = {
-								{label = "LOC_MAIN_MENU_MODS",					callback = OnMods,					tooltip = "LOC_MAIN_MENU_MODS_AND_DLC_TT"},
-								{label = "LOC_MAIN_MENU_HALL_OF_FAME",			callback = OnHallofFame,			tooltip = "LOC_MAIN_MENU_HALL_OF_FAME_TT"},
-								{label = "LOC_MAIN_MENU_CREDITS",				callback = OnCredits,				tooltip = "LOC_MAINMENU_CREDITS_TT"},
-							};
+-- 230411 Move additional options into the main menu
+--local m_AdditionalSubMenu :table = {
+--								{label = "LOC_MAIN_MENU_MODS",					callback = OnMods,					tooltip = "LOC_MAIN_MENU_MODS_AND_DLC_TT"},
+--								{label = "LOC_MAIN_MENU_HALL_OF_FAME",			callback = OnHallofFame,			tooltip = "LOC_MAIN_MENU_HALL_OF_FAME_TT"},
+--								{label = "LOC_MAIN_MENU_CREDITS",				callback = OnCredits,				tooltip = "LOC_MAINMENU_CREDITS_TT"},
+--							};
 
 local m_BenchmarkSubMenu :table = {
 								{label = "LOC_BENCHMARK_GRAPHICS",			callback = OnGraphicsBenchmark,		tooltip = "LOC_BENCHMARK_GRAPHICS_TT"},
@@ -994,10 +997,14 @@ local m_defaultMainMenuOptions :table = {
 								{label = "LOC_SINGLE_PLAYER",				callback = OnSinglePlayer,		tooltip = "LOC_MAINMENU_SINGLE_PLAYER_TT",			submenu = m_SinglePlayerSubMenu}, 
 								{label = "LOC_PLAY_MULTIPLAYER",			callback = OnMultiPlayer,		tooltip = "LOC_MAINMENU_MULTIPLAYER_TT",			submenu = m_MultiPlayerSubMenu, buttonState = UpdateMultiplayerButton},
 								{label = "LOC_MAIN_MENU_OPTIONS",			callback = OnOptions,			tooltip = "LOC_MAINMENU_GAME_OPTIONS_TT"},
-								{label = "LOC_MAIN_MENU_ADDITIONAL_CONTENT",callback = OnAdditionalContent,	tooltip = "LOC_MAIN_MENU_ADDITIONAL_CONTENT_TT",	submenu = m_AdditionalSubMenu},
+								-- 230411 move additional content into the main menu
+								--{label = "LOC_MAIN_MENU_ADDITIONAL_CONTENT",callback = OnAdditionalContent,	tooltip = "LOC_MAIN_MENU_ADDITIONAL_CONTENT_TT",	submenu = m_AdditionalSubMenu},
+								{label = "LOC_MAIN_MENU_MODS",				callback = OnMods,				tooltip = "LOC_MAIN_MENU_MODS_AND_DLC_TT"},
+								{label = "LOC_MAIN_MENU_HALL_OF_FAME",		callback = OnHallofFame,		tooltip = "LOC_MAIN_MENU_HALL_OF_FAME_TT"},
 								{label = "LOC_MAIN_MENU_TUTORIAL",			callback = OnTutorial,			tooltip = "LOC_MAINMENU_TUTORIAL_TT"},
 								{label = "LOC_MAIN_MENU_BENCH",				callback = OnBenchmark,			tooltip = "LOC_MAINMENU_BENCHMARK_TT",				submenu = m_BenchmarkSubMenu},
 								{label = "LOC_WORLDBUILDER_TITLE",		    callback = OnWorldBuilder,		tooltip = "LOC_MAINMENU_WORLDBUILDER_TT", 			submenu = m_WorldBuilderSubMenu},								
+								{label = "LOC_MAIN_MENU_CREDITS",			callback = OnCredits,			tooltip = "LOC_MAINMENU_CREDITS_TT"},
 								{label = "LOC_MAIN_MENU_EXIT_TO_DESKTOP",	callback = OnUserRequestClose,	tooltip = "LOC_MAINMENU_EXIT_GAME_TT"}
 							};
 
@@ -1061,6 +1068,11 @@ function BuildMenu(menuOptions:table)
 		local option = m_mainOptionIM:GetInstance();
 		option.ButtonLabel:LocalizeAndSetText(menuOption.label);
 		option.SelectedLabel:LocalizeAndSetText(menuOption.label);
+		-- 230411 add a list icon if the menu has a submenu
+		if menuOption.submenu then
+			option.ButtonLabel:SetText(option.ButtonLabel:GetText().."   [ICON_List]");
+			option.SelectedLabel:SetText(option.SelectedLabel:GetText().."   [ICON_List]");
+		end
 		option.LabelAlphaAnim:SetToBeginning();
 		option.LabelAlphaAnim:Play();
 		-- The label begin its alpha animation slightly after the flag begins to fly out
@@ -1496,3 +1508,5 @@ function Initialize()
 	RealizeLogoAndMovie();
 end
 Initialize();
+
+print("OK loaded mainmenu.lua from Better FrontEnd (UI)");
