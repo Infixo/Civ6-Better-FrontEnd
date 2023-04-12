@@ -1,0 +1,41 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Mod id="72F3FEBC-64DF-9B21-3706-29C485D2523D" version="1">
+	<Properties>
+		<Name>Better FrontEnd (UI)</Name>
+		<Description>Enhancements of the FrontEnd.[NEWLINE]Version 1.0.</Description>
+		<Teaser>Enhancements of the FrontEnd.</Teaser>
+		<Authors>Infixo</Authors>
+		<AffectsSavedGames>0</AffectsSavedGames>
+		<CompatibleVersions>2.0</CompatibleVersions>
+	</Properties>
+	<FrontEndActions>
+		<ImportFiles id="BFE_FrontEnd_ImportFiles">
+			<Properties><LoadOrder>1</LoadOrder></Properties>
+			<File>ui/loadgamemenu.lua</File>
+			<File>ui/loadgamemenu.xml</File>
+			<File>ui/LoadSaveMenu_Shared.lua</File>
+			<File>ui/mainmenu.lua</File>
+			<File>ui/mainmenu.xml</File>
+		</ImportFiles>
+	</FrontEndActions>
+	<!--
+	<InGameActions>
+		<ImportFiles id="BFE_InGame_ImportFiles">
+			<Properties><LoadOrder>1</LoadOrder></Properties>
+			<File>ui/SaveGameMenu.lua</File>
+			<File>ui/SaveGameMenu.xml</File>
+		</ImportFiles>
+	</InGameActions>
+	-->
+	<Files>
+		<!-- FronEnd -->
+		<File>ui/loadgamemenu.lua</File>
+		<File>ui/loadgamemenu.xml</File>
+		<File>ui/loadsavemenu_shared.lua</File>
+		<File>ui/mainmenu.lua</File>
+		<File>ui/mainmenu.xml</File>
+		<!-- InGame -->
+		<!--<File>ui/SaveGameMenu.lua</File>-->
+		<!--<File>ui/SaveGameMenu.xml</File>-->
+	</Files>
+</Mod>
