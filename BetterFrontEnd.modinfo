@@ -11,6 +11,8 @@
 	<FrontEndActions>
 		<ImportFiles id="BFE_FrontEnd_ImportFiles">
 			<Properties><LoadOrder>1</LoadOrder></Properties>
+			<File>ui/advancedsetup.lua</File>
+			<File>ui/advancedsetup.xml</File>
 			<File>ui/loadgamemenu.lua</File>
 			<File>ui/loadgamemenu.xml</File>
 			<File>ui/loadsavemenu_shared.lua</File>
@@ -29,6 +31,8 @@
 	-->
 	<Files>
 		<!-- FronEnd -->
+		<File>ui/advancedsetup.lua</File>
+		<File>ui/advancedsetup.xml</File>
 		<File>ui/loadgamemenu.lua</File>
 		<File>ui/loadgamemenu.xml</File>
 		<File>ui/loadsavemenu_shared.lua</File>
