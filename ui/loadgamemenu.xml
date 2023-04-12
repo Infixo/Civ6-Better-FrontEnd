@@ -82,46 +82,36 @@
                     <Container ID="SelectedFile" Size="parent,parent" Hidden="1">
                       <Stack ID="SelectedFileStack" StackGrowth="Down" Padding="1">
                         <!-- INSPECTOR contents-->
-                        <Grid Style="ShellLoadSaveHeader" Size="parent,40" Offset="0,1" Anchor="C,T">
-                          <Label ID="FileName" Anchor="C,C" Offset="0,0" Style="BlueGlow" WrapWidth="260"/>
+                        <Grid Style="ShellLoadSaveHeader" Size="parent,45" Offset="0,1" Anchor="C,T">
+                            <Label ID="FileName" Anchor="C,C" Offset="0,-8" Style="BlueGlow" WrapWidth="260"/> <!-- font 16 -->
+						    <Label ID="SelectedTimeLabel" Anchor="C,C" Offset="0,8" Align="Center" Style="FontNormal14" ColorSet="BodyTextCool" FontStyle="stroke"/>
                         </Grid>
                         <!-- Map Area -->
-						            <Container ID="InspectorTopArea" Size="parent,auto">
-						            	<Box ID="InspectorTopAreaBox" Color="6,77,127,150" Size="parent,auto" InnerPadding="4,4">
-						            		<Container ID="InspectorTopAreaGridContainer" Size="parent,auto" InnerPadding="8,8">
-						            			<!--<Grid ID="InspectorTopAreaGrid" Style="DecoGrid" Color="30,125,182,50" Size="parent,auto" InnerPadding="6,25" Anchor="C,T">-->
-						            				<Stack ID="InspectorTopAreaStack" StackGrowth="Down" Padding="1">
-						            					<Container ID="SavedMinimapContainer" Anchor="C,T" Size="parent,160">
-						            						<Grid Style="DropShadow3" Size="267,160" Anchor="C,C" Color="0,0,0,120"/>
-						            						<Image Texture="Shell_MinimapBacking" Size="250,141" Anchor="C,C"/>
-						            						<Image ID="SavedMinimap" Texture="Shell_MinimapPlaceholder" StretchMode="UniformToFill" Anchor="C,C" Offset="-1,-1" Hidden="1">
-						            							<Grid Style="SubContainer5" Size="parent,parent" Color="0,0,0,120"/>
-						            						</Image>
-						            						<Image Texture="Shell_MinimapOverlay" Size="252,147" Anchor="C,C"/>
-						            						<Label ID="NoMapDataLabel" Anchor="C,C" String="LOC_LOADSAVE_NO_MAP_DATA" Style="HeaderTextParchment16" Hidden="0"/>
-						            					</Container>
-						            					<Container ID="Root" Size="parent,30" Anchor="L,B" Offset="0,2">
-						            						<Container Size="146,parent" Anchor="L,T">
-						            							<Stack ID="SelectedGameInfoStack1" StackGrowth="Down" Anchor="R,T">
-						            								<Label ID="SelectedCurrentTurnLabel" Anchor="R,T" Align="Right" Style="FontNormal14" ColorSet="BodyTextCool" FontStyle="stroke" WrapWidth="140"/>
-						            								<Label ID="SelectedTimeLabel" Anchor="R,T" Align="Right" Style="FontNormal14" ColorSet="BodyTextCool" FontStyle="stroke" WrapWidth="140"/>
-						            							</Stack>
-						            						</Container>
-						            						<Container Size="10,parent" Anchor="C,T">
-						            							<Label Anchor="C,T" Style="FontNormal14" String="[ICON_BulletGlow]"/>
-						            						</Container>
-						            						<Container Size="146,parent" Anchor="R,T">
-						            							<Stack ID="SelectedGameInfoStack2" StackGrowth="Down">
-						            								<Label ID="SelectedHostEraLabel" Anchor="L,T" Offset="0,0" Style="FontNormal14" ColorSet="BodyTextCool" FontStyle="stroke" WrapWidth="140"/>
-						            							</Stack>
-						            						</Container>
-						            					</Container>
-						            				</Stack>
-						            			<!--</Grid>-->
-						            		</Container>
-						            		<Box Color="30,125,182,50" Size="parent,2" Anchor="L,B"/>
-						            	</Box>
-						            </Container>
+						<Container ID="InspectorTopArea" Size="parent,auto">
+							<Box ID="InspectorTopAreaBox" Color="6,77,127,150" Size="parent,auto" InnerPadding="2,2">
+								<Container ID="InspectorTopAreaGridContainer" Size="parent,auto" InnerPadding="2,2">
+									<Stack ID="InspectorTopAreaStack" StackGrowth="Down" Padding="1">
+										<Container ID="SavedMinimapContainer" Anchor="C,T" Size="parent,160">
+											<Grid Style="DropShadow3" Size="267,160" Anchor="C,C" Color="0,0,0,120"/>
+											<Image Texture="Shell_MinimapBacking" Size="250,141" Anchor="C,C"/>
+											<Image ID="SavedMinimap" Texture="Shell_MinimapPlaceholder" StretchMode="UniformToFill" Anchor="C,C" Offset="-1,-1" Hidden="1">
+												<Grid Style="SubContainer5" Size="parent,parent" Color="0,0,0,120"/>
+											</Image>
+											<Image Texture="Shell_MinimapOverlay" Size="252,147" Anchor="C,C"/>
+											<Label ID="NoMapDataLabel" Anchor="C,C" String="LOC_LOADSAVE_NO_MAP_DATA" Style="HeaderTextParchment16" Hidden="0"/>
+										</Container>
+										<Container ID="Root" Size="parent,20" Anchor="L,B">
+											<Stack StackGrowth="Right" Anchor="C,T">
+												<Label ID="SelectedCurrentTurnLabel" Style="FontNormal14" ColorSet="BodyTextCool" FontStyle="stroke"/>
+												<Label Offset="0,2" Style="FontNormal14" String=" [ICON_You] "/>
+												<Label ID="SelectedHostEraLabel" Style="FontNormal14" ColorSet="BodyTextCool" FontStyle="stroke"/>
+											</Stack>
+										</Container>
+									</Stack>
+								</Container>
+								<Box Color="30,125,182,50" Size="parent,2" Anchor="L,B"/>
+							</Box>
+						</Container>
                         <!-- Civ and Leader Portrait -->
                         <Box ID="GameDetailIconsArea" Size="parent,55" Color="30,125,182,50" Anchor="C,T" Offset="-1,0">
                           <Grid Style="ShellGameDetailsContainer" Size="72,55" Anchor="L,C"/>

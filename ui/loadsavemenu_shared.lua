@@ -680,18 +680,18 @@ function PopulateInspectorData(fileInfo, fileName, mod_errors)
 		Controls.SelectedCurrentTurnLabel:SetText("");
 	end
 	
-	-- 230412 DisplaySaveTime uses US format by default (M/D/Y, h:mm am)
-	-- change into European ISO 8601 i.e. YYYY-MM-DD hh:mm
-	-- this is the only place where save time is shown
+	-- 230412 DisplaySaveTime uses format dependent on the game language
+	-- change into European ISO 8601 i.e. YYYY-MM-DD hh:mm when 24-hour clock is used together with English
 	if (fileInfo.DisplaySaveTime ~= nil) then
-		-- 230412 actual save time is stored in SaveTime which is Unix epoch
-		-- for start just do a text conversion
-		--local saveYear
-		--local saveMonth
-		--local saveDay
-		--local saveHour
-		--local saveMinute
-		Controls.SelectedTimeLabel:SetText(fileInfo.DisplaySaveTime);
+		if UserConfiguration.GetValue("ClockFormat") == 1 and Locale.GetCurrentLanguage().Type == "en_US" then
+			-- 230412 actual save time is stored in SaveTime which is Unix epoch
+			-- for start just do a text conversion which is much easier
+			local m, d, y, h, n, t = string.match(fileInfo.DisplaySaveTime, "(%d+)/(%d+)/(%d+), (%d+):(%d+) (%a+)");
+			Controls.SelectedTimeLabel:SetText(string.format("%d-%02d-%02d %d:%02d", tonumber(y)+2000, tonumber(m), tonumber(d), t == "PM" and tonumber(h)+12 or tonumber(h), tonumber(n)));
+		else
+			-- default behavior for other languages and 12-hour English
+			Controls.SelectedTimeLabel:SetText(fileInfo.DisplaySaveTime);
+		end
 	else
 		Controls.SelectedTimeLabel:SetText("");
 	end
@@ -820,10 +820,10 @@ function PopulateInspectorData(fileInfo, fileName, mod_errors)
 		end
 	end
 
-	Controls.SelectedGameInfoStack1:CalculateSize();
-	Controls.SelectedGameInfoStack1:ReprocessAnchoring();
-	Controls.SelectedGameInfoStack2:CalculateSize();
-	Controls.SelectedGameInfoStack2:ReprocessAnchoring();
+	--Controls.SelectedGameInfoStack1:CalculateSize();
+	--Controls.SelectedGameInfoStack1:ReprocessAnchoring();
+	--Controls.SelectedGameInfoStack2:CalculateSize();
+	--Controls.SelectedGameInfoStack2:ReprocessAnchoring();
 
 	Controls.Root:CalculateVisibilityBox();
 	Controls.Root:ReprocessAnchoring();
