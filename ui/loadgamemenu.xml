@@ -38,6 +38,10 @@
                 <!-- SELECTOR opaque background -->
                 <Stack StackGrowth="Down"  Anchor="C,T" Padding="2">
                   <!-- Stack of Selector Controls-->
+				  <!-- 230411 search bar -->
+				  <Grid Texture="Controls_Search2" SliceCorner="30,13" SliceTextureSize="41,26" Offset="0,5" Size="parent,26">
+					<EditBox ID="SearchEditBox" Style="FontNormal16" Anchor="L,C" Offset="24,0" Size="parent-10,16" MaxLength="20" CallOnChar="1" />
+				  </Grid>
                   <GridButton ID="AutoCheck" String="LOC_AUTOSAVES" Style="CheckBoxControl"  Size="340,24"/>
                   <GridButton ID="CloudCheck" String="LOC_STEAMCLOUD" Style="CheckBoxControl" Size="340,24" Hidden="1">
                       <Label ID="CheckNewIndicator" String="[ICON_New]" Anchor="L,T" Hidden="0"/>
@@ -85,7 +89,7 @@
 						            <Container ID="InspectorTopArea" Size="parent,auto">
 						            	<Box ID="InspectorTopAreaBox" Color="6,77,127,150" Size="parent,auto" InnerPadding="4,4">
 						            		<Container ID="InspectorTopAreaGridContainer" Size="parent,auto" InnerPadding="8,8">
-						            			<Grid ID="InspectorTopAreaGrid" Style="DecoGrid" Color="30,125,182,50" Size="parent,auto" InnerPadding="6,25" Anchor="C,T">
+						            			<!--<Grid ID="InspectorTopAreaGrid" Style="DecoGrid" Color="30,125,182,50" Size="parent,auto" InnerPadding="6,25" Anchor="C,T">-->
 						            				<Stack ID="InspectorTopAreaStack" StackGrowth="Down" Padding="1">
 						            					<Container ID="SavedMinimapContainer" Anchor="C,T" Size="parent,160">
 						            						<Grid Style="DropShadow3" Size="267,160" Anchor="C,C" Color="0,0,0,120"/>
@@ -113,7 +117,7 @@
 						            						</Container>
 						            					</Container>
 						            				</Stack>
-						            			</Grid>
+						            			<!--</Grid>-->
 						            		</Container>
 						            		<Box Color="30,125,182,50" Size="parent,2" Anchor="L,B"/>
 						            	</Box>

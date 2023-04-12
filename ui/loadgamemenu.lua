@@ -1,3 +1,5 @@
+print("Loading loadgamemenu.lua from Better FrontEnd (UI)");
+
 include( "InstanceManager" );
 include( "SupportFunctions" );
 include( "Civ6Common" );
@@ -293,6 +295,7 @@ function OnDeleteYes()
 	
 	Controls.ActionButton:SetDisabled(m_isActionButtonDisabled);
 	SetupFileList();
+	RefreshFileListWithFilter();
 end
 
 ----------------------------------------------------------------        
@@ -482,6 +485,7 @@ end
 function OnRefresh()
 	SetupDirectoryBrowsePulldown();
 	SetupFileList();
+	RefreshFileListWithFilter();
 end
 
 -- ===========================================================================
@@ -525,6 +529,17 @@ function OnSelectedFileStackSizeChanged()
 end
 
 -- ===========================================================================
+-- 230411 search bar
+
+function OnSearchBarStringChanged()
+	SearchBarStringChanged(Controls.SearchEditBox:GetText());
+end
+
+function OnSearchBarHasFocus()
+	Controls.SearchEditBox:ClearString();
+end
+
+-- ===========================================================================
 function Initialize()
 	m_kPopupDialog = PopupDialog:new( "LoadGameMenu" );
 
@@ -555,6 +570,9 @@ function Initialize()
 	Controls.Delete:RegisterCallback( Mouse.eLClick, OnDelete );
 	Controls.Delete:RegisterCallback( Mouse.eMouseEnter, function() UI.PlaySound("Main_Menu_Mouse_Over"); end);
 	Controls.SelectedFileStack:RegisterSizeChanged( OnSelectedFileStackSizeChanged );
+	-- 230411 search bar
+	Controls.SearchEditBox:RegisterStringChangedCallback(OnSearchBarStringChanged);
+	Controls.SearchEditBox:RegisterHasFocusCallback(OnSearchBarHasFocus);
 
 	-- LUA Events
 	LuaEvents.HostGame_SetLoadGameServerType.Add( OnSetLoadGameServerType );
@@ -571,3 +589,4 @@ function Initialize()
 end
 Initialize();
 
+print("Loading loadgamemenu.lua from Better FrontEnd (UI)");

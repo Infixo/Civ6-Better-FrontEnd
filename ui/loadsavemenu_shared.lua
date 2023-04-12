@@ -1,3 +1,4 @@
+print("Loading LoadSaveMenu_Shared.lua from Better FrontEnd");
 include( "SupportFunctions" );
 include( "Colors") ;
 
@@ -37,6 +38,9 @@ g_CurrentGameMetaData = nil
 g_FilenameIsValid = false;
 
 g_DontUpdateFileName = false;
+
+g_SearchQuery = nil; -- 230411 search pattern
+
 ----------------------------------------------------------------        
 -- File Name Handling
 ----------------------------------------------------------------
@@ -675,8 +679,18 @@ function PopulateInspectorData(fileInfo, fileName, mod_errors)
 	else
 		Controls.SelectedCurrentTurnLabel:SetText("");
 	end
-
+	
+	-- 230412 DisplaySaveTime uses US format by default (M/D/Y, h:mm am)
+	-- change into European ISO 8601 i.e. YYYY-MM-DD hh:mm
+	-- this is the only place where save time is shown
 	if (fileInfo.DisplaySaveTime ~= nil) then
+		-- 230412 actual save time is stored in SaveTime which is Unix epoch
+		-- for start just do a text conversion
+		--local saveYear
+		--local saveMonth
+		--local saveDay
+		--local saveHour
+		--local saveMinute
 		Controls.SelectedTimeLabel:SetText(fileInfo.DisplaySaveTime);
 	else
 		Controls.SelectedTimeLabel:SetText("");
@@ -756,6 +770,7 @@ function PopulateInspectorData(fileInfo, fileName, mod_errors)
 	end
 
 	local mod_titles = {};
+	local dev_titles = {};
 
 	for i,v in ipairs(mods) do
 		local title;
@@ -770,22 +785,36 @@ function PopulateInspectorData(fileInfo, fileName, mod_errors)
 				title = Locale.Lookup(v.Title);
 			end
 		end
-
+		local temp = mod_titles;
+		if Modding.IsModOfficial(v.Id) then temp = dev_titles; end
 		if(mod_errors and mod_errors[v.Id]) then
-			table.insert(mod_titles, "[ICON_BULLET] [COLOR_RED]" .. title .. "[ENDCOLOR]");
+			table.insert(temp, "[ICON_BULLET] [COLOR_RED]" .. title .. "[ENDCOLOR]");
 		else
-			table.insert(mod_titles, "[ICON_BULLET] " .. title);
+			table.insert(temp, "[ICON_BULLET] " .. title);
 		end
 	end
 	table.sort(mod_titles, function(a,b) return Locale.Compare(a,b) == -1 end);
+	table.sort(dev_titles, function(a,b) return Locale.Compare(a,b) == -1 end);
 	
 	if(#mod_titles > 0) then		
 		spacer = g_DescriptionTextManager:GetInstance();
 		spacer.Text:SetText(" ");
 
 		local header = g_DescriptionHeaderManager:GetInstance();
-		header.HeadingTitle:LocalizeAndSetText("LOC_MAIN_MENU_ADDITIONAL_CONTENT");
+		header.HeadingTitle:LocalizeAndSetText("LOC_MULTIPLAYER_LOBBY_MODS_COMMUNITY");
 		for i,v in ipairs(mod_titles) do
+			local instance = g_DescriptionTextManager:GetInstance();
+			instance.Text:SetText(v);	
+		end
+	end
+	
+	if(#dev_titles > 0) then		
+		spacer = g_DescriptionTextManager:GetInstance();
+		spacer.Text:SetText(" ");
+
+		local header = g_DescriptionHeaderManager:GetInstance();
+		header.HeadingTitle:LocalizeAndSetText("LOC_MULTIPLAYER_LOBBY_MODS_OFFICIAL");
+		for i,v in ipairs(dev_titles) do
 			local instance = g_DescriptionTextManager:GetInstance();
 			instance.Text:SetText(v);	
 		end
@@ -806,8 +835,8 @@ function PopulateInspectorData(fileInfo, fileName, mod_errors)
 	Controls.InspectorTopAreaStack:CalculateSize();
 	Controls.InspectorTopAreaStack:ReprocessAnchoring();
 
-	Controls.InspectorTopAreaGrid:DoAutoSize();
-	Controls.InspectorTopAreaGrid:ReprocessAnchoring();
+	--Controls.InspectorTopAreaGrid:DoAutoSize();
+	--Controls.InspectorTopAreaGrid:ReprocessAnchoring();
 
 	Controls.InspectorTopAreaGridContainer:DoAutoSize();
 	Controls.InspectorTopAreaGridContainer:ReprocessAnchoring();
@@ -876,7 +905,7 @@ function RebuildFileList()
 		if(v.IsQuicksave) then
 			v.DisplayName = Locale.Lookup("LOC_LOADSAVE_QUICK_SAVE");
 		else
-			v.DisplayName = GetDisplayName(v);
+			v.DisplayName = GetDisplayName(v); -- 230411 here is an actual name created
 		end
 	
 		v.LastModified = UI.GetSaveGameModificationTimeRaw(v);
@@ -898,7 +927,7 @@ function RebuildFileList()
 		OnActionButton();
 	end
 
-	g_FileEntryInstanceList = {};
+	g_FileEntryInstanceList = {}; -- 230411 to speed up use this table and just show on/off
 
 	local instance_index = 1;
 	function per_entry(entry)
@@ -914,6 +943,7 @@ function RebuildFileList()
 	end
 
 	function per_batch()
+		RefreshFileListWithFilter(); -- 230411 search bar
 		Controls.FileListEntryStack:CalculateSize();
         Controls.ScrollPanel:SetScrollValue(0.0);
 		Controls.ScrollPanel:CalculateSize();
@@ -1050,6 +1080,52 @@ function SetupFileList()
 
 end
 
+
+--[[ g_FileList single entry example
+LoadGameMenu: FileType	0
+LoadGameMenu: MapScriptName	{"LOC_MAP_CONTINENTS":[{"locale":"en_US","text":"Continents"},{"locale":"fr_FR","text":"Continents"},{"locale":"de_DE","text":"Kontinente"},{"locale":"it_IT","text":"Continenti"},{"locale":"es_ES","text":"Continentes"},{"locale":"ja_JP","text":"大陸"},{"locale":"ru_RU","text":"Континенты"},{"locale":"pl_PL","text":"Kontynenty"},{"locale":"ko_KR","text":"대륙"},{"locale":"zh_Hant_HK","text":"大陸"},{"locale":"zh_Hans_CN","text":"大陆"},{"locale":"pt_BR","text":"Continentes"}]}
+LoadGameMenu: CurrentTurn	121
+LoadGameMenu: MapSizeName	{"LOC_MAPSIZE_SMALL_NAME":[{"locale":"en_US","text":"Small"},{"locale":"fr_FR","text":"Petite"},{"locale":"de_DE","text":"Klein"},{"locale":"it_IT","text":"Piccola"},{"locale":"es_ES","text":"Pequeño"},{"locale":"ja_JP","text":"小"},{"locale":"ru_RU","text":"Маленькая"},{"locale":"pl_PL","text":"Mała"},{"locale":"ko_KR","text":"소형"},{"locale":"zh_Hant_HK","text":"小"},{"locale":"zh_Hans_CN","text":"小"},{"locale":"pt_BR","text":"Pequeno"}]}
+LoadGameMenu: HostCivilizationName	{"LOC_CIVILIZATION_MACEDON_NAME":[{"locale":"en_US","text":"Macedon"},{"locale":"fr_FR","text":"Macédoine","plurality":"1","gender":"feminine"},{"locale":"de_DE","text":"Makedonien|Makedonien|Makedonien|Makedoniens|Makedonien","plurality":"1","gender":"neuter:no_article"},{"locale":"it_IT","text":"Macedonia|della Macedonia|alla Macedonia|la Macedonia|dalla Macedonia","plurality":"1","gender":"feminine"},{"locale":"es_ES","text":"Macedonia","plurality":"1","gender":"feminine"},{"locale":"ja_JP","text":"マケドニア"},{"locale":"ru_RU","text":"Македония|Македонии|Македонии|Македонию|Македонией|Македонии","plurality":"1","gender":"feminine"},{"locale":"pl_PL","text":"Macedonia|Macedonii|Macedonii|Macedonię|Macedonią|Macedonii|Macedonia|Macedonii|Macedonii|Macedonię|Macedonią|Macedonii","plurality":"1","gender":"feminine"},{"locale":"ko_KR","text":"마케도니아"},{"locale":"zh_Hant_HK","text":"馬其頓"},{"locale":"zh_Hans_CN","text":"马其顿"},{"locale":"pt_BR","text":"Macedônia","plurality":"1","gender":"feminine"}]}
+LoadGameMenu: RequiredMods	table: 000000001EB27BC0
+LoadGameMenu: Slot	0
+LoadGameMenu: HostEra	ERA_MEDIEVAL
+LoadGameMenu: IsDirectory	false
+LoadGameMenu: MapSize	MAPSIZE_SMALL
+LoadGameMenu: SavedByVersion	1.0.12.41 (887696)
+LoadGameMenu: EnabledMods	table: 000000001EB2C170
+LoadGameMenu: DisplaySaveTime	3/29/23, 3:35 AM
+LoadGameMenu: Name	ALEXANDER 121 med.Civ6Save
+LoadGameMenu: Type	1
+LoadGameMenu: GameSpeed	GAMESPEED_STANDARD
+LoadGameMenu: RulesetName	{"LOC_EXPANSION2_NAME":[{"locale":"en_US","text":"Expansion: Gathering Storm"},{"locale":"fr_FR","text":"Extension : Gathering Storm"},{"locale":"de_DE","text":"Erweiterung: Gathering Storm"},{"locale":"it_IT","text":"Espansione: Gathering Storm"},{"locale":"es_ES","text":"Expansión: Gathering Storm"},{"locale":"ja_JP","text":"拡張パック: 嵐の訪れ"},{"locale":"ru_RU","text":"Дополнение: Gathering Storm"},{"locale":"pl_PL","text":"Rozszerzenie: Gathering Storm"},{"locale":"ko_KR","text":"확장팩: 몰려드는 폭풍"},{"locale":"zh_Hant_HK","text":"資料片：風雲際會"},{"locale":"zh_Hans_CN","text":"资料片：风云变幻"},{"locale":"pt_BR","text":"Expansão: Gathering Storm"}]}
+LoadGameMenu: SaveTime	1680053745
+LoadGameMenu: Ruleset	RULESET_EXPANSION_2
+LoadGameMenu: GameSpeedName	{"LOC_GAMESPEED_STANDARD_NAME":[{"locale":"en_US","text":"Standard"},{"locale":"fr_FR","text":"Normale"},{"locale":"de_DE","text":"Standard"},{"locale":"it_IT","text":"Standard"},{"locale":"es_ES","text":"Estándar"},{"locale":"ja_JP","text":"標準"},{"locale":"ru_RU","text":"Стандартная"},{"locale":"pl_PL","text":"Zwykła"},{"locale":"ko_KR","text":"보통"},{"locale":"zh_Hant_HK","text":"標準"},{"locale":"zh_Hans_CN","text":"标准"},{"locale":"pt_BR","text":"Padrão"}]}
+LoadGameMenu: Id	8
+LoadGameMenu: EnabledGameModes	{
+    "modes": [
+        {
+            "name": "{\"LOC_GAMEMODE_BARBARIAN_CLANS_NAME\":[{\"locale\":\"en_US\",\"text\":\"Barbarian Clans Mode\"},{\"locale\":\"fr_FR\",\"text\":\"Mode Clans barbares\"},{\"locale\":\"de_DE\",\"text\":\"Barbaren-Clans-Modus\"},{\"locale\":\"it_IT\",\"text\":\"Modalità Clan di barbari\"},{\"locale\":\"es_ES\",\"text\":\"Modo Clanes bárbaros\"},{\"locale\":\"ja_JP\",\"text\":\"「蛮族の部族」モード\"},{\"locale\":\"ru_RU\",\"text\":\"Режим «Варварские кланы»\"},{\"locale\":\"pl_PL\",\"text\":\"Tryb barbarzyńskich klanów\"},{\"locale\":\"ko_KR\",\"text\":\"야만인 부족 모드\"},{\"locale\":\"zh_Hant_HK\",\"text\":\"蠻族部族模式\"},{\"locale\":\"zh_Hans_CN\",\"text\":\"蛮族氏族模式\"},{\"locale\":\"pt_BR\",\"text\":\"Modo Clãs Bárbaros\"}]}"
+        }
+    ]
+}
+LoadGameMenu: HostCivilization	CIVILIZATION_MACEDON
+LoadGameMenu: HostBackgroundColorValue	-16656137
+LoadGameMenu: IsQuicksave	false
+LoadGameMenu: IsPrevious	false
+LoadGameMenu: HostEraName	{"LOC_ERA_MEDIEVAL_NAME":[{"locale":"en_US","text":"Medieval Era"},{"locale":"fr_FR","text":"Ère médiévale","plurality":"1","gender":"feminine:vowel"},{"locale":"de_DE","text":"Mittelalter|Mittelalter|Mittelalter|Mittelalters|Mittelalter","plurality":"1","gender":"neuter"},{"locale":"it_IT","text":"Epoca medievale"},{"locale":"es_ES","text":"Época Medieval","plurality":"1","gender":"feminine"},{"locale":"ja_JP","text":"中世"},{"locale":"ru_RU","text":"Средневековье|Средневековья|Средневековью|Средневековье|Средневековьем|Средневековье","plurality":"1","gender":"neuter"},{"locale":"pl_PL","text":"Średniowiecze|Średniowiecza|Średniowieczu|Średniowiecze|Średniowieczem|Średniowieczu|średniowiecze|średniowiecza|średniowieczu|średniowiecze|średniowieczem|średniowieczu","plurality":"1","gender":"neuter"},{"locale":"ko_KR","text":"중세 시대"},{"locale":"zh_Hant_HK","text":"中世紀"},{"locale":"zh_Hans_CN","text":"中世纪"},{"locale":"pt_BR","text":"Era Medieval","plurality":"1","gender":"feminine"}]}
+LoadGameMenu: HostLeaderName	{"LOC_LEADER_ALEXANDER_NAME":[{"locale":"en_US","text":"Alexander"},{"locale":"fr_FR","text":"Alexandre","plurality":"1","gender":"masculine:no_article"},{"locale":"de_DE","text":"Alexander","plurality":"1","gender":"masculine:no_article"},{"locale":"it_IT","text":"Alessandro|di Alessandro|ad Alessandro|Alessandro|da Alessandro","plurality":"1","gender":"masculine"},{"locale":"es_ES","text":"Alejandro","plurality":"1","gender":"masculine"},{"locale":"ja_JP","text":"アレキサンドロス"},{"locale":"ru_RU","text":"Александр|Александра|Александру|Александра|Александром|Александре","plurality":"1","gender":"masculine"},{"locale":"pl_PL","text":"Aleksander|Aleksandra|Aleksandrowi|Aleksandra|Aleksandrem|Aleksandrze|Aleksander|Aleksandra|Aleksandrowi|Aleksandra|Aleksandrem|Aleksandrze","plurality":"1","gender":"masculine"},{"locale":"ko_KR","text":"알렉산더"},{"locale":"zh_Hant_HK","text":"亞歷山大"},{"locale":"zh_Hans_CN","text":"亚历山大"},{"locale":"pt_BR","text":"Alexandre","plurality":"1","gender":"masculine"}]}
+LoadGameMenu: HostDifficultyName	{"LOC_DIFFICULTY_PRINCE_NAME":[{"locale":"en_US","text":"Prince"},{"locale":"fr_FR","text":"Prince"},{"locale":"de_DE","text":"Prinz"},{"locale":"it_IT","text":"Principe"},{"locale":"es_ES","text":"Príncipe","plurality":"1","gender":"masculine"},{"locale":"ja_JP","text":"王子"},{"locale":"ru_RU","text":"Князь|князя|князю|князя|князем|князе","plurality":"1","gender":"masculine"},{"locale":"pl_PL","text":"Książę|Księcia|Księciu|Księcia|Księciem|Księciu|książę|księcia|księciu|księcia|księciem|księciu","plurality":"1","gender":"masculine"},{"locale":"ko_KR","text":"왕자"},{"locale":"zh_Hant_HK","text":"王子"},{"locale":"zh_Hans_CN","text":"王子"},{"locale":"pt_BR","text":"Príncipe","plurality":"1","gender":"masculine"}]}
+LoadGameMenu: HostDifficulty	DIFFICULTY_PRINCE
+LoadGameMenu: Location	1
+LoadGameMenu: HostForegroundColorValue	-5329234
+LoadGameMenu: HostLeader	LEADER_ALEXANDER
+LoadGameMenu: IsAutosave	false
+LoadGameMenu: Path	D:/Users/Grzegorz/Documents/My Games/Sid Meier's Civilization VI/Saves/Single/ALEXANDER 121 med.Civ6Save
+LoadGameMenu: AccountReference	0
+--]]
+
 ----------------------------------------------------------------        
 -- The callback for file queries
 function OnFileListQueryResults( fileList : table, id : number )
@@ -1083,4 +1159,37 @@ end
 ----------------------------------------------------------------        
 function SetDontUpdateFileName( newValue )
 	g_DontUpdateFileName = newValue;
+end
+
+----------------------------------------------------------------        
+-- 230411 Search bar support
+
+-- https://www.lua.org/pil/20.4.html
+function nocase(s)
+	return string.gsub(s, "%a",
+		function (c)
+			return string.format("[%s%s]", string.lower(c), string.upper(c))
+		end)
+end
+
+function SearchBarStringChanged(str:string)
+	local newSearch = nil;
+	if str and string.len(str) > 1 then
+		newSearch = nocase(str);
+	end
+	if newSearch ~= g_SearchQuery then
+		g_SearchQuery = newSearch;
+		RefreshFileListWithFilter();
+	end
+end
+
+function RefreshFileListWithFilter()
+	if g_FileEntryInstanceList == nil then return; end -- nothing to filter
+	for idx,instance in pairs(g_FileEntryInstanceList) do
+		if g_SearchQuery == nil or string.find(instance.ButtonText:GetText(), g_SearchQuery) ~= nil then
+			instance.InstanceRoot:SetShow(true);
+		else
+			instance.InstanceRoot:SetHide(true);
+		end
+	end
 end

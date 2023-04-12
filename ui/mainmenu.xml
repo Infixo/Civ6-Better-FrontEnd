@@ -24,7 +24,7 @@
         </Container>
 
         <Container          ID="SubMenuContainer" Size="300,400">
-          <AlphaAnim        ID="SubMenuAlpha" Pause="0" AlphaBegin="0" AlphaEnd="1" Cycle="Once" Function="Root" Speed="3" Size="400,450" Stopped="1" Offset="0,40" Anchor="L,C">
+          <AlphaAnim        ID="SubMenuAlpha" Pause="0" AlphaBegin="0" AlphaEnd="1" Cycle="Once" Function="Root" Speed="3" Size="400,450" Stopped="1" Offset="0,-10" Anchor="L,C">
             <ScrollPanel	  ID="SubMenuClip" Anchor="L,C"	Size="400,450" FullClip="1" Disabled="1">
               <Image Texture="Controls_DivVertical" Size="14,20" StretchMode="None" AnchorSide="I,O" Anchor="T,L" Color="90,139,190"/>
               <SlideAnim	  ID="SubButtonTrackAnim" Begin="0,-390"	End="0,-20" Size="parent,parent" Speed="3" Cycle="Once" Function="Root" Stopped="1">

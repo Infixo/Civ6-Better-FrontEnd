@@ -13,7 +13,7 @@
 			<Properties><LoadOrder>1</LoadOrder></Properties>
 			<File>ui/loadgamemenu.lua</File>
 			<File>ui/loadgamemenu.xml</File>
-			<File>ui/LoadSaveMenu_Shared.lua</File>
+			<File>ui/loadsavemenu_shared.lua</File>
 			<File>ui/mainmenu.lua</File>
 			<File>ui/mainmenu.xml</File>
 		</ImportFiles>
