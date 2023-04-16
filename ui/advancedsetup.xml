@@ -2,9 +2,9 @@
 <Context xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="..\..\..\..\..\..\CivTech\Libs\ForgeUI\ForgeUI_Assets\Controls.xsd"
 		Style="FontNormal14">
 
-  <Include File="PopupDialog"/>
+	<Include File="PopupDialog"/>
 
-  <Box ID="MainGrid" Style="ShellBGBox">
+	<Box ID="MainGrid" Style="ShellBGBox">
 
 		<Container ID="MainWindow" Size="1024,768" Anchor="C,B" >
 			<Grid ID="LogoContainer" Style="SubContainer4" Size="parent-10,116" Anchor="C,T" Color="7,28,50" AnchorSide="I,O" Offset="0,4">
@@ -21,27 +21,49 @@
 				<Label ID="WindowTitle" Style="ShellHeader" Anchor="C,C" String="{LOC_SETUP_CREATE_GAME:upper}"/>
 			</Container>
 
+			<!-- 230412 CREATE GAME MAIN WINDOW -->
 			<Container ID="CreateGameWindow" Size="parent,parent">
 				<Grid Style="SubContainer4" Size="parent-10,parent" Anchor="C,T" Color="7,28,50" Offset="0,55"  InnerPadding="0,0">					
 					<Box Size="340,parent" Color="8,36,68,150" Anchor="C,T">
 						<Grid Style="SubContainer3" Size="parent-6,parent-6" Anchor="C,C" Color="6,54,93,255">
 							<Image Texture="Controls_Gradient_HalfRadial" Size="parent, 120" Anchor="C,T" Color="44,90,134,255" Offset="0,-4" FlipY="1"/>
 							<Image Texture="Controls_Gradient_HalfRadial" Size="parent, 120" Anchor="C,B" Color="44,90,134,255" Offset="0,-4"/>
-
+							
+							<!-- CENTRAL SCROLL PANEL WITH ALL PARAMS -->
 							<ScrollPanel ID="CreateGame_ParametersScrollPanel" Vertical="1" Offset="0,0" Anchor="C,T" Size="Parent,parent-42" >
 								<Stack ID="CreateGameOptions" StackGrowth="Down" Anchor="C,T" >
-									<Container ID="CreateGame_RulesetContainer" Offset="0,30" Size="parent+10,50">
-										<Box Color="62,152,203,20" Anchor="C,T" Size="parent,30">
+								
+									<!-- Ruleset -->
+									<Container ID="CreateGame_RulesetContainer" Offset="0,0" Size="parent+10,65">
+										<Box Color="62,152,203,20" Anchor="C,B" Size="parent,30">
 											<Label Anchor="C,T" Style="ShellSubHeaderText" String="{LOC_SETUP_CHOOSE_RULESET:upper}" AnchorSide="I,O"/>
 											<PullDown ID="CreateGame_GameRuleset" Anchor="C,C" Style="PullDownBlue" Size="325,24"/>
 										</Box>
 									</Container>
-									<Container  ID="CreateGame_LocalPlayerContainer" Size="parent+10,70" Hidden="1">
-										<Box Color="62,152,203,20" Anchor="C,C" Size="parent,55">
-											<Label Anchor="C,T" Style="ShellSubHeaderText" String="{LOC_SETUP_CIVILIZATION:upper}" AnchorSide="I,O"/>
-											<PullDown ID="Basic_LocalPlayerPulldown" Anchor="C,C" Offset="0,0" Size="325,50"  AutoSizePopup="1" ScrollThreshold="520" SpaceForScroll="15">
+									
+									<!-- Player aka Leader -->
+									<Container  ID="CreateGame_LocalPlayerContainer" Size="parent+10,115" Hidden="1">
+										<Box Color="62,152,203,20" Anchor="C,B" Size="parent,87">
+											<Label Anchor="C,T" Style="ShellSubHeaderText" String="{LOC_SETUP_CIVILIZATION:upper}" AnchorSide="I,O"/> <!-- choose civilization-->
+											
+									
+											<!-- 230416 Search feature -->
+											<!--
+											<Grid Texture="Controls_Search2" SliceCorner="30,13" SliceTextureSize="41,26" Anchor="L,T" Offset="1,2" Size="325,26">
+												<EditBox ID="SearchEditBox" Style="FontNormal16" Anchor="L,C" Offset="24,0" Size="parent-10,16" MaxLength="20" CallOnChar="1" />
+											</Grid>
+											-->
+											
+											<Grid Style="Civilopedia_SearchPanel">
+												<Container Anchor="L,C" Offset="24,0" Size="parent-20,16" >
+													<EditBox ID="SearchEditBox" Style="Civilopedia_SearchEditBox" CallOnChar="1" /> <!-- <Civilopedia_SearchEditBox Style="FontNormal16" Size="parent,16" MaxLength="40" String="LOC_TREE_SEARCH_W_DOTS"/> -->
+												</Container>
+											</Grid>
+											
+											
+											<PullDown ID="Basic_LocalPlayerPulldown" Anchor="C,T" Offset="-1,15" Size="325,50" AutoSizePopup="1" ScrollThreshold="520" SpaceForScroll="15">
 												<ButtonData>
-													<GridButton  Size="325,45" Style="TabFont">
+													<GridButton Offset="0,20" Size="325,45" Style="TabFont">
 														<GridData Texture="Controls_DropDownControlLarge" StateOffsetIncrement="0,45"	SliceCorner="10,15" SliceTextureSize="45,45" />
 														<Container Size="44,44" Anchor="L,T" Offset="3,3">
 															<Image	ID="Basic_LocalPlayerCivIconBG" Texture="CircleBacking44"		Size="44,44"/>
@@ -56,7 +78,7 @@
                                                         <ScrollTextField ID="Basic_LocalPlayerScrollText" Size="200,50" Style="TabFont" Offset="100,0" Anchor="L,C"/>
 													</GridButton>
 												</ButtonData>
-												<GridData Offset="0,45" Texture="Controls_DropdownPanel" InnerPadding="0,6" SliceCorner="10,10" SliceTextureSize="22,22"/>
+												<GridData Offset="0,65" Texture="Controls_DropdownPanel" InnerPadding="0,6" SliceCorner="10,10" SliceTextureSize="22,22"/>
 												<ScrollPanelData Anchor="C,C" Vertical="1" Size="parent,parent" AutoScrollBar="1" >
 													<ScrollBar Style="Slider_Blue" Anchor="R,C" AnchorSide="O,I"   />
 												</ScrollPanelData>
@@ -76,56 +98,60 @@
 													</GridButton>
 												</InstanceData>
 											</PullDown>
-
 										</Box>
 									</Container>
-
-									<Container ID="CreateGame_GameDifficultyContainer" Size="parent+10,50" Hidden="1">
+									
+									<!-- Game difficulty -->
+									<Container ID="CreateGame_GameDifficultyContainer" Size="parent+10,65" Hidden="1">
 										<Box Color="62,152,203,20" Anchor="C,B" Size="parent,30">
 											<Label Anchor="C,T" Style="ShellSubHeaderText" String="{LOC_SETUP_DIFFICULTY:upper}" AnchorSide="I,O"/>
 											<PullDown ID="CreateGame_GameDifficulty" Anchor="C,C" Style="PullDownBlue" Size="220,24"/>
 										</Box>
 									</Container>
-
-									<Container ID="CreateGame_SpeedPulldownContainer" Size="parent+10,70" Hidden="1">
+								
+									<!-- Game Speed -->
+									<Container ID="CreateGame_SpeedPulldownContainer" Size="parent+10,65" Hidden="1">
 										<Box Color="62,152,203,20" Anchor="C,B" Size="parent,30">
 											<Label Anchor="C,T" Style="ShellSubHeaderText" String="{LOC_SETUP_SPEED:upper}" AnchorSide="I,O"/>
 											<PullDown ID="CreateGame_SpeedPulldown" Anchor="C,C" Style="PullDownBlue" Size="220,24"/>
 										</Box>
 									</Container>
 
-									<Container ID="CreateGame_MapTypeContainer" Size="parent+10,70" Hidden="1">
+									<!-- Map Type - Pulldown - by default used only for scenarios -->
+									<Container ID="CreateGame_MapTypeContainer" Size="parent+10,65" Hidden="1">
 										<Box Color="62,152,203,20" Anchor="C,B" Size="parent,30">
 											<Label Anchor="C,T" Style="ShellSubHeaderText" String="{LOC_SETUP_MAP_TYPE:upper}" AnchorSide="I,O"/>
 											<PullDown ID="CreateGame_MapType" Anchor="C,C" Style="PullDownBlue" ScrollThreshold="350" Size="220,24"/>
 										</Box>
 									</Container>
 
-									<Container ID="CreateGame_MapSelectContainer" Size="parent+10,70">
+									<!-- Map Type - Button -->
+									<Container ID="CreateGame_MapSelectContainer" Size="parent+10,65">
 										<Box Color="62,152,203,20" Anchor="C,B" Size="parent,30">
 											<Label Anchor="C,T" Style="ShellSubHeaderText" String="{LOC_SETUP_MAP_TYPE:upper}" AnchorSide="I,O"/>
 											<GridButton ID="MapSelectButton" Anchor="C,C" Style="ButtonControl" Size="219,24" String="LOC_SETUP_MAP_MAP_SELECT" TruncateWidth="205" TruncateTooltip="1"/>
 										</Box>
 									</Container>
 
-									<Container ID="CreateGame_MapSizeContainer" Size="parent+10,70" Hidden="1">
+									<!-- Map Size -->
+									<Container ID="CreateGame_MapSizeContainer" Size="parent+10,65" Hidden="1">
 										<Box Color="62,152,203,20" Anchor="C,B" Size="parent,30">
 											<Label Anchor="C,T" Style="ShellSubHeaderText" String="{LOC_SETUP_MAP_SIZE:upper}" AnchorSide="I,O"/>
 											<PullDown ID="CreateGame_MapSize" Anchor="C,C" Style="PullDownBlue" Size="220,24"/>
 										</Box>
 									</Container>
 
-                  <!-- Game Modes Stack -->
-                  <Container Size="parent+10,auto" Offset ="0,30">
-                    <Box Color="62,152,203,20" Anchor="C,B" Size="parent,auto">
-                      <Label Anchor="C,T" Style="ShellSubHeaderText" String="{LOC_SETUP_MODE_SELECT:upper}" AnchorSide="I,O"/>
-                      <Stack Anchor="C,T" Offset="0,0" Padding="0" Size="auto,auto" StackGrowth="Right" ID="CreateGame_GameModeParametersStack" WrapWidth="330" WrapGrowth="Bottom">
-                        <Container Size="330, 50" ID="NoGameModesContainer">
-                          <Label Anchor="C,C" Style="ShellSubHeaderText" String="LOC_SETUP_NO_GAME_MODES" TruncateWidth="330" TruncateTooltip="1"/>
-                        </Container>
-                      </Stack>
-                    </Box>
-                  </Container>
+									<!-- Game Modes Stack -->
+									<Container Size="parent+10,auto" Offset ="0,30">
+										<Box Color="62,152,203,20" Anchor="C,B" Size="parent,auto">
+											<Label Anchor="C,T" Style="ShellSubHeaderText" String="{LOC_SETUP_MODE_SELECT:upper}" AnchorSide="I,O"/>
+											<Stack Anchor="C,T" Offset="0,0" Padding="0" Size="auto,auto" StackGrowth="Right" ID="CreateGame_GameModeParametersStack" WrapWidth="330" WrapGrowth="Bottom">
+												<Container Size="330, 50" ID="NoGameModesContainer">
+													<Label Anchor="C,C" Style="ShellSubHeaderText" String="LOC_SETUP_NO_GAME_MODES" TruncateWidth="330" TruncateTooltip="1"/>
+												</Container>
+											</Stack>
+										</Box>
+									</Container>
                     
 									<!-- Primary Parameters Stack -->
 									<Stack Anchor="C,T" Offset="0,0" Padding="0" Size="parent+10,auto" StackGrowth="Bottom" ID="CreateGame_ExtraParametersStack"/>
@@ -136,7 +162,16 @@
 								<ScrollBar Style="Slider_Blue" Length="516" Anchor="R,T" Offset="4,0" AnchorSide="O,I"/>
 							</ScrollPanel>
 
-
+							<!-- 230416 Search feature -->
+							<!-- This is after the scroll panel with the params so when visible it overlaps all other controls -->
+							<Container ID="SearchResultsPanelContainer" Anchor="L,T" Offset="0,120" Size="parent,auto" Hidden="1">
+								<ScrollPanel ID="SearchResultsPanel" Size="parent,500" Vertical="1" AutoScrollBar="1">
+									<ScrollBar Style="Slider_Blue" Anchor="R,C" AnchorSide="O,I"/>
+									<Grid Texture="Controls_OptionPanel" SliceCorner="3,3" SliceSize="10,52" SliceTextureSize="16,64" Size="parent,auto" AutoSizePadding="0,5">
+										<Stack ID="SearchResultsStack" StackGrowth="Bottom" Padding="2" Offset="0,5"/>
+									</Grid>
+								</ScrollPanel>
+							</Container>
 
 							<GridButton ID="AdvancedSetupButton" Anchor="C,B" Style="ShellButtonOrnateFlat" String="{LOC_SETUP_ADVANCED_OPTIONS:upper}" Size="parent,36">
 								<Image Texture="Controls_Compass" StretchMode="Auto" Anchor="C,T" AnchorSide="I,O" Color="44,90,134,50"/>
@@ -144,11 +179,11 @@
 
 						</Grid>
 
-						<Container ID="BasicTooltipContainer" Size="340,670" Anchor="R,C" AnchorSide="O,I"/>
-            <Container ID="BasicPlacardContainer" Size="340,670" Anchor="L,C" AnchorSide="O,I"/>
+					<Container ID="BasicTooltipContainer" Size="340,670" Anchor="R,C" AnchorSide="O,I"/>
+					<Container ID="BasicPlacardContainer" Size="340,670" Anchor="L,C" AnchorSide="O,I"/>
 
-            <Container ID="GameModeTooltipContainer" Size="340,parent" Anchor="R,C" AnchorSide="O,I">
-              <AlphaAnim					ID="GameModeToolTipAlpha" AlphaBegin="0" AlphaEnd="1" Speed="4" Function="Root" Cycle="Once" Size="parent,parent" Stopped="1">
+					<Container ID="GameModeTooltipContainer" Size="340,parent" Anchor="R,C" AnchorSide="O,I">
+					  <AlphaAnim					ID="GameModeToolTipAlpha" AlphaBegin="0" AlphaEnd="1" Speed="4" Function="Root" Cycle="Once" Size="parent,parent" Stopped="1">
 				        <SlideAnim				ID="GameModeToolTipSlide" Start="20,0" End="0,0" Speed="4" Function="Root" Cycle="Once" Size="parent,parent">
 					        <Grid																	Style="EnhancedToolTip" Size="parent,parent">
 						        <ScrollPanel  ID="GameModeScrollPanel" Vertical="1" Size="parent-12,parent-25" AutoScrollBar="1" Anchor="C,T" Offset="0,9">
@@ -157,10 +192,10 @@
 						        </ScrollPanel>
 					        </Grid>
 				        </SlideAnim>
-			        </AlphaAnim>
-            </Container>
-            <Container ID="GameModePlacardContainer" Size="340,parent" Anchor="L,C" AnchorSide="O,I">
-              <AlphaAnim    ID="GameModeAlpha" AlphaBegin="0" AlphaEnd="1" Speed="4" Function="Root" Cycle="Once" Size="parent,parent" Stopped="1">
+			          </AlphaAnim>
+					</Container>
+					<Container ID="GameModePlacardContainer" Size="340,parent" Anchor="L,C" AnchorSide="O,I">
+					  <AlphaAnim    ID="GameModeAlpha" AlphaBegin="0" AlphaEnd="1" Speed="4" Function="Root" Cycle="Once" Size="parent,parent" Stopped="1">
 				        <SlideAnim  ID="GameModeSlide" Start="-20,0" End="0,0" Speed="4" Function="Root" Cycle="Once" Size="parent,parent">
 					        <Grid Style="EnhancedToolTip" Size="parent,parent">
 						        <Container Size="parent-12,parent-25" Anchor="C,T" Offset="0,9">
@@ -177,13 +212,14 @@
 						        </Container>
 					        </Grid>
 				        </SlideAnim>
-			        </AlphaAnim>
-            </Container>
+			          </AlphaAnim>
+					</Container>
 					</Box>
 				</Grid>
 			</Container>
 			<!-- Decorative Border -->
 
+			<!-- ADVANCED OPTIONS SCREEN -->
 			<Container ID="AdvancedOptionsWindow" Hidden="1" Size="parent,parent">
 				<Grid Style="SubContainer4" Size="parent-10,parent" Anchor="C,T" Color="7,28,50" Offset="0,55"  InnerPadding="10,10">
 					<Stack Anchor="C,T" StackGrowth="Right" Padding="10">
@@ -393,7 +429,7 @@
 							<Image Texture="Controls_CircleBacking45" Size="51,51" Anchor="L,T" Offset="-3,-3"/>
 							<Image ID="LeaderIcon" Texture="Leaders45" Size="45,45" Anchor="C,C"/>
 						</Container>
-                        <ScrollTextField ID="ScrollText" Size="225,50" Offset="55,0" Style="TabFont"  Anchor="L,C"/>
+                        <ScrollTextField ID="ScrollText" Size="225,50" Offset="55,0" Style="TabFont"  Anchor="L,C"/> <!-- name of the selected leader -->
 					</GridButton>
 				</ButtonData>
 				<GridData Offset="-70,50" Texture="Controls_DropdownPanel" InnerPadding="0,6" SliceCorner="10,10" SliceTextureSize="22,22"/>
@@ -657,4 +693,15 @@
   <!-- Dialog Support -->
   <MakeInstance Name="PopupDialog" />
   
+	<!-- 230416 Search feature -->
+	<Instance Name="SearchResultInstance">
+		<Container ID="Root" Size="auto,auto">
+			<GridButton ID="Button" Offset="0,0" Size="315,auto" Style="ButtonLightWeightGrid" InnerPadding="10,10">
+				<Image ID="Icon" Anchor="L,C" Texture="Leaders45" Size="45,45" />
+				<Label ID="Text" Offset="50,0" Style="TabFont" String="TechName" Anchor="L,C" WrapWidth="parent-60" ColorSet="BodyTextCool"/>
+				<!--<Label ID="Line2" Offset="36,8" Style="FontNormal14" String="TechName" Anchor="L,C" WrapWidth="parent-45" ColorSet="BodyTextCool"/>-->
+			</GridButton>
+		</Container>
+	</Instance>
+
 </Context>

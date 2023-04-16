@@ -1,3 +1,5 @@
+print("Loading playersetuplogic.lua from Better FrontEnd (UI)");
+
 -------------------------------------------------
 -- Player Setup Logic
 -------------------------------------------------
@@ -16,6 +18,10 @@ local m_currentInfo = {											--m_currentInfo is a duplicate of the data whi
 
 local m_tooltipControls = {};
 local m_teamColors = {};
+
+g_playerInstances = {}; -- 230412 will keep instances of the pulldown
+g_SearchQuery = nil; -- 230412 search pattern
+g_leaderParameters = {};
 
 -------------------------------------------------------------------------------
 -- Parameter Hooks
@@ -544,6 +550,7 @@ function GetPlayerIcons(domain, leader_type)
 end
 
 function GetPlayerInfo(domain, leader_type)
+	--print("GetPlayerInfo", domain, leader_type);
 	-- Kludge:  We're special casing random for now.
 	-- this will eventually change and 'RANDOM' will
 	-- be just another row in the players entry.
@@ -939,14 +946,14 @@ end
 -- representation of the parameter
 -------------------------------------------------------------------------------
 function SetupLeaderPulldown(
-	playerId:number, 
-	instance:table, 
-	pulldownControlName:string, 
+	playerId:number, -- m_singlePlayerID
+	instance:table, -- Controls
+	pulldownControlName:string,  -- Basic_LocalPlayerPulldown, Advanced_LocalPlayerPulldown, PlayerPullDown
 	civIconControlName, 
 	civIconBGControlName, 
 	leaderIconControlName,
-	scrollTextControlName, 
-	tooltipControls:table,
+	scrollTextControlName, -- Basic_LocalPlayerScrollText, Advanced_LocalPlayerScrollText, nil
+	tooltipControls:table, -- m_BasicTooltipData, advancedTooltipData
 	colorPullDownName,
 	colorWarnName	
 )
@@ -983,7 +990,7 @@ function SetupLeaderPulldown(
 	local civIconBG = instance[civIconBGControlName];
 	local leaderIcon = instance[leaderIconControlName];
 	local scrollText = instance[scrollTextControlName];
-	local instanceManager = control["InstanceManager"];
+	local instanceManager = control["InstanceManager"]; -- PullDownInstanceManager:new( "InstanceOne", "Button", control ); -> 230412 these are all leaders?
 	
 	-- Jersey support
 	colorPullDownName = colorPullDownName or "ColorPullDown";
@@ -1261,7 +1268,9 @@ function SetupLeaderPulldown(
 			end
 
 			if(refresh) then
-				instanceManager:ResetInstances();
+				instanceManager:ResetInstances(); -- 230412 rebuild the pulldown
+				g_playerInstances = {}; -- 230402 search bar
+				g_leaderParameters = {}; -- 230416 search feature
 
 				-- Avoid creating call back for each value.
 				local hasPlacard = tooltipControls.HasLeaderPlacard;
@@ -1269,11 +1278,24 @@ function SetupLeaderPulldown(
 					DisplayCivLeaderToolTip(m_currentInfo, tooltipControls, not hasPlacard);
 				end;
 
-				for i,v in ipairs(values) do
-					
+				for i,v in ipairs(values) do -- 230412 where the values come from???
+					g_leaderParameters[v.Value] = v;
+				--[[
+AdvancedSetup: Domain	Players:Expansion2_Players
+AdvancedSetup: QueryId	51
+AdvancedSetup: SortIndex	100
+AdvancedSetup: RawDescription	LOC_TRAIT_LEADER_TO_WORLDS_END_DESCRIPTION
+AdvancedSetup: QueryIndex	32
+AdvancedSetup: Value	LEADER_ALEXANDER
+AdvancedSetup: Name	Alexander
+AdvancedSetup: RawName	LOC_LEADER_ALEXANDER_NAME
+				--]]
+					--print(i, "=========================");
+					--for k,vv in pairs(v) do print(k,vv) end
 					local icons = GetPlayerIcons(v.Domain, v.Value);
 
-					local entry = instanceManager:GetInstance();
+					local entry = instanceManager:GetInstance(); -- 230412 store it somewhere?
+					table.insert(g_playerInstances, entry); -- 230412 search bar
 				
 					local caption = v.Name;
 					if(v.Invalid) then 
@@ -1474,3 +1496,38 @@ function GameSetup_ConfigurationChanged()
 	SetupParameters_Log("Configuration Changed!");
 	GameSetup_RefreshParameters();
 end
+
+----------------------------------------------------------------        
+-- 230412 Search bar support
+
+-- https://www.lua.org/pil/20.4.html
+function nocase(s)
+	return string.gsub(s, "%a",
+		function (c)
+			return string.format("[%s%s]", string.lower(c), string.upper(c))
+		end)
+end
+
+function SearchBarStringChanged(str:string)
+	local newSearch = nil;
+	if str and string.len(str) > 1 then
+		newSearch = nocase(str);
+	end
+	if newSearch ~= g_SearchQuery then
+		g_SearchQuery = newSearch;
+		RefreshPlayersListWithFilter();
+	end
+end
+
+function RefreshPlayersListWithFilter()
+	if g_playerInstances == nil then return; end -- nothing to filter
+	for _,instance in ipairs(g_playerInstances) do
+		if g_SearchQuery == nil or string.find(instance.ScrollText:GetText(), g_SearchQuery) ~= nil then
+			instance.Button:SetShow(true);
+		else
+			instance.Button:SetHide(true);
+		end
+	end
+end
+
+print("Loaded playersetuplogic.lua from Better FrontEnd (UI)");

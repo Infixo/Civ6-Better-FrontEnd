@@ -18,6 +18,7 @@
 			<File>ui/loadsavemenu_shared.lua</File>
 			<File>ui/mainmenu.lua</File>
 			<File>ui/mainmenu.xml</File>
+			<File>ui/playersetuplogic.lua</File>
 		</ImportFiles>
 	</FrontEndActions>
 	<!--
@@ -38,6 +39,7 @@
 		<File>ui/loadsavemenu_shared.lua</File>
 		<File>ui/mainmenu.lua</File>
 		<File>ui/mainmenu.xml</File>
+		<File>ui/playersetuplogic.lua</File>
 		<!-- InGame -->
 		<!--<File>ui/SaveGameMenu.lua</File>-->
 		<!--<File>ui/SaveGameMenu.xml</File>-->

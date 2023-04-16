@@ -1164,12 +1164,16 @@ end
 -- Add UI entries for all the players.  This does not set the
 -- UI values of the player.
 -- ===========================================================================
+-- 230412 this funnction is called in OnShow()
+-- it just works with raw controls and tons of params
+-- TODO: add a local table of all instances, and attach search box to it via on/off only
+-- do not rebuild anything, just show on and off
 function RefreshPlayerSlots()
-
+	print("RefreshPlayerSlots()");
 	RebuildPlayerParameters();
 	m_NonLocalPlayerSlotManager:ResetInstances();
 
-	local player_ids = GameConfiguration.GetParticipatingPlayerIDs();
+	local player_ids = GameConfiguration.GetParticipatingPlayerIDs(); -- 230412 possible filter here?
 
 	local minPlayers = MapConfiguration.GetMinMajorPlayers() or 2;
 	local maxPlayers = MapConfiguration.GetMaxMajorPlayers() or 2;
@@ -1221,8 +1225,10 @@ function RefreshPlayerSlots()
 		HasLeaderPlacard	= false;
 	};
 
+	-- 230412 iterate through players
 	for i, player_id in ipairs(player_ids) do	
 		if(m_singlePlayerID == player_id) then
+			-- 230412 this one is for human player
 			SetupLeaderPulldown(player_id, Controls, "Basic_LocalPlayerPulldown", "Basic_LocalPlayerCivIcon",  "Basic_LocalPlayerCivIconBG", "Basic_LocalPlayerLeaderIcon", "Basic_LocalPlayerScrollText", m_BasicTooltipData);
 			SetupLeaderPulldown(player_id, Controls, "Advanced_LocalPlayerPulldown", "Advanced_LocalPlayerCivIcon", "Advanced_LocalPlayerCivIconBG", "Advanced_LocalPlayerLeaderIcon", "Advanced_LocalPlayerScrollText", advancedTooltipData, "Advanced_LocalColorPullDown");
 		else
@@ -1235,7 +1241,7 @@ function RefreshPlayerSlots()
 			end
 			ui_instance.RemoveButton:SetHide(not can_remove);
 			
-			SetupLeaderPulldown(player_id, ui_instance,"PlayerPullDown",nil,nil,nil,nil,advancedTooltipData);
+			SetupLeaderPulldown(player_id, ui_instance,"PlayerPullDown",nil,nil,nil,nil,advancedTooltipData); -- 230412 this is for AI players?
 		end
 	end
 
@@ -1704,6 +1710,145 @@ function OnShutdown()
 	LuaEvents.LeaderPicker_SetParameterValues.Remove(OnSetParameterValues);
 end
 
+
+
+-- ===========================================================================
+-- 230416 Search feature; original code from Civilopedia
+-- ===========================================================================
+
+-- debug routine - prints a table, and tables inside recursively (up to 5 levels)
+function dshowrectable(tTable:table, iLevel:number)
+	local level:number = 0;
+	if iLevel ~= nil then level = iLevel; end
+	for k,v in pairs(tTable) do
+		print(string.rep("---:",level), k, type(v), tostring(v));
+		if type(v) == "table" and level < 5 then dshowrectable(v, level+1); end
+	end
+end
+
+local LL = Locale.Lookup;
+local LOC_TREE_SEARCH_W_DOTS = LL("LOC_TREE_SEARCH_W_DOTS");
+local _SearchQuery = nil;
+local _SearchResultsManager = InstanceManager:new("SearchResultInstance", "Root", Controls.SearchResultsStack);
+
+-------------------------------------------------------------------------------
+-- Indexes cached data into a search database.
+-------------------------------------------------------------------------------
+
+function PopulateSearchData()
+	print("PopulateSearchData()");
+	
+	-- Populate Full Text Search
+	local searchContext = "Leaders";
+	if Search.HasContext(searchContext) then Search.DestroyContext(searchContext); end
+	if not Search.CreateContext(searchContext, "[COLOR_LIGHTBLUE]", "[ENDCOLOR]", "...") then
+		print("BFE: Failed to create a search context.");
+		return;
+	end
+
+	local domain = "Players:Expansion2_Players"; -- TODO: where does the domain come from?
+	local info_query = "SELECT LeaderType FROM Players WHERE Domain = ?";
+	local info_results = CachedQuery(info_query, domain);
+
+	if not info_results then
+		print("BFE: Failed to read Leaders from Players config table.");
+		return;
+	end
+			
+	for i,row in ipairs(info_results) do
+		local info = GetPlayerInfo(domain, row.LeaderType);
+		-- Fields: LeaderType, LeaderName, CivilizationName, Uniques[Name,Description], LeaderAbility[Name,Description], CivilizationAbility[Name,Description]
+		--print("***** INFO *****", row.LeaderType);
+		--dshowrectable(info);
+		local line1:string = string.format("%s (%s)", LL(info.LeaderName), LL(info.CivilizationName));
+		local uniques:table = {};
+		for _,item in ipairs(info.Uniques) do
+			table.insert(uniques, LL(item.Name));
+		end
+		table.sort(uniques);
+		local line2:string = table.concat(uniques, ", ");
+		Search.AddData(searchContext, info.LeaderType, line1, line2);
+		-- v[1] == LeaderType
+		-- v[2] == Name and Civilization
+		-- v[3] == Uniques
+		--print("AddData", info.LeaderType, line1, line2);
+	end
+	Search.Optimize(searchContext);
+end
+
+-------------------------------------------------------------------------------
+-- UI callbacks
+-------------------------------------------------------------------------------
+
+function OnSearchBarGainFocus()
+	Controls.SearchEditBox:ClearString();
+	Controls.SearchResultsPanelContainer:SetHide(true);
+end
+
+function OnSearchCharCallback()
+	local str = Controls.SearchEditBox:GetText();
+	local has_found = {};
+	if str ~= nil and #str > 0 and str ~= LOC_TREE_SEARCH_W_DOTS then
+		_SearchQuery = str;
+		local results = Search.Search("Leaders", str);
+		_SearchResultsManager:DestroyInstances();
+		if (results and #results > 0) then
+			-- prepare parameter call
+			local parameters = GetPlayerParameters(0); -- TODO: 0 is default for single player game, what about MP?
+		
+			for i, v in ipairs(results) do
+				if has_found[v[1]] == nil then
+					-- v[1] LeaderType
+					-- v[2] Line1 leader & civ
+					-- v[3] Line2 uniques
+					local instance = _SearchResultsManager:GetInstance();
+
+					-- Search results already localized.
+					instance.Text:SetText(v[2].."[NEWLINE]"..v[3]);
+
+					local icons = GetPlayerIcons("Players:Expansion2_Players", v[1]); -- TODO: DOMAIN
+					instance.Icon:SetIcon(icons.LeaderIcon);
+					
+					if g_leaderParameters[v[1]] then
+						instance.Button:RegisterCallback(Mouse.eLClick, function() 
+							Controls.SearchResultsPanelContainer:SetHide(true);
+							_SearchQuery = nil;
+							local parameter = parameters.Parameters["PlayerLeader"];
+							parameters:SetParameterValue(parameter, g_leaderParameters[v[1]]);
+						end );
+					end
+					
+					instance.Button:RegisterCallback( Mouse.eMouseEnter, function() 
+						local info = GetPlayerInfo("Players:Expansion2_Players", v[1]); --  TODO: DOMAIN
+						DisplayCivLeaderToolTip(info, m_BasicTooltipData, false); 
+					end);
+					
+					
+					has_found[v[1]] = true;
+				end
+			end
+
+			Controls.SearchResultsStack:CalculateSize();
+			Controls.SearchResultsStack:ReprocessAnchoring();
+			Controls.SearchResultsPanel:CalculateSize();
+			Controls.SearchResultsPanelContainer:SetHide(false);
+		else
+			Controls.SearchResultsPanelContainer:SetHide(true);
+		end
+	elseif(str == nil) then
+		Controls.SearchResultsPanelContainer:SetHide(true);
+	end
+end
+
+function OnSearchCommitCallback()
+	if(_SearchQuery and #_SearchQuery > 0 and _SearchQuery ~= LOC_TREE_SEARCH_W_DOTS) then
+		Controls.SearchEditBox:SetText(LOC_TREE_SEARCH_W_DOTS);
+		OnOpenCivilopedia(_SearchQuery); -- open the first found result or just the start page if nothing found
+		Controls.SearchResultsPanelContainer:SetHide(true);
+		_SearchQuery = nil;	-- clear query.
+	end
+end
+
 -- ===========================================================================
 --
 -- ===========================================================================
@@ -1743,8 +1888,14 @@ function Initialize()
     LuaEvents.CityStatePicker_SetParameterValue.Add(OnSetParameterValue);
 	LuaEvents.LeaderPicker_SetParameterValues.Add(OnSetParameterValues);
 
+	-- 230416 Search feature
+	Controls.SearchEditBox:RegisterStringChangedCallback(OnSearchCharCallback);
+	Controls.SearchEditBox:RegisterHasFocusCallback(OnSearchBarGainFocus);
+	Controls.SearchEditBox:RegisterCommitCallback(OnSearchCommitCallback); -- EditMode also automatically calls the commit callback when the EditBox loses focus.
+	PopulateSearchData();
+
 	Resize();
 end
 Initialize();
 
-print("Loaded advancedsetup.lua from Better FrontEnd (UI)");
+print("BFE: Loaded advancedsetup.lua OK");
