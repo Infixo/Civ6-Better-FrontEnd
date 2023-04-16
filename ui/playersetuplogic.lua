@@ -23,6 +23,27 @@ g_playerInstances = {}; -- 230412 will keep instances of the pulldown
 g_SearchQuery = nil; -- 230412 search pattern
 g_leaderParameters = {};
 
+g_victoryIcons = {
+	VICTORY_CONQUEST   = "[ICON_Capital]",
+	VICTORY_CULTURE    = "[ICON_Culture]", -- ICON_Tourism
+	VICTORY_RELIGIOUS  = "[ICON_Faith]",
+	VICTORY_SCORE      = "[ICON_Turn]",
+	VICTORY_TECHNOLOGY = "[ICON_Science]",
+	VICTORY_DIPLOMATIC = "[ICON_FAVOR]", -- ICON_FAVOR_LARGE funny, it is not defined anywhere...
+}
+
+-------------------------------------------------------------------------------
+-- Debug routine - prints a table, and tables inside recursively (up to 5 levels)
+-------------------------------------------------------------------------------
+function dshowrectable(tTable:table, iLevel:number)
+	local level:number = 0;
+	if iLevel ~= nil then level = iLevel; end
+	for k,v in pairs(tTable) do
+		print(string.rep("---:",level), k, type(v), tostring(v));
+		if type(v) == "table" and level < 5 then dshowrectable(v, level+1); end
+	end
+end
+
 -------------------------------------------------------------------------------
 -- Parameter Hooks
 -------------------------------------------------------------------------------
@@ -250,7 +271,7 @@ function GetPlayerParameterError(playerId)
 					if(isPreGame) then
 						if(max_unique_players and (unique_leaders or unique_civilizations)) then
 							if(player_count > max_unique_players) then
-								print("Player Count - " .. player_count .. " Max Unique Players - " .. max_unique_players);
+								--print("Player Count - " .. player_count .. " Max Unique Players - " .. max_unique_players);
 								return {Reason="LOC_SETUP_PLAYER_PARAMETER_ERROR"};
 							end
 						end
@@ -671,6 +692,7 @@ function GetPlayerInfo(domain, leader_type)
 
 			-- Ensure unique items are in the correct order.
 			table.sort(info.Uniques, function(a,b) return a.SortIndex < b.SortIndex; end);
+			
 
 			return info;
 		end
@@ -683,6 +705,73 @@ function GetPlayerInfo(domain, leader_type)
 		LeaderName = "LOC_RANDOM_LEADER",
 		LeaderType = leader_type,
 	};
+end
+
+-- 230416 victories data from HallofFame
+-- TODO: handle ruleset properly, as for now we will just show Expansion2
+-- HallofFame.GetGames is THE function to call
+--[[
+ GameSummaries: GameId	27
+ GameSummaries: LastPlayed	1591647513
+ GameSummaries: Ruleset	RULESET_EXPANSION_2
+ GameSummaries: TurnCount	325
+ GameSummaries: StartEraType	ERA_ANCIENT
+ GameSummaries: GameSpeedType	GAMESPEED_STANDARD
+ GameSummaries: Players	table: 000000001E46F3D0
+ GameSummaries: Map	{4873eb62-8ccc-4574-b784-dda455e74e68}Maps/EarthMaps/EarthStandard_XP2.Civ6Map
+ GameSummaries: StartTurn	1
+ GameSummaries: VictoryType	VICTORY_TECHNOLOGY  // table Victories  
+ GameSummaries: VictorTeamId	0
+ GameSummaries: MapSizeType	MAPSIZE_STANDARD
+ GameSummaries: GameMode	-379035929
+Players:
+ GameSummaries: PlayerId	0
+ GameSummaries: DifficultyType	DIFFICULTY_DEITY
+ GameSummaries: LeaderType	LEADER_LADY_SIX_SKY
+ GameSummaries: CivilizationName	Maya
+ GameSummaries: Score	1129
+ GameSummaries: IsLocal	true
+ GameSummaries: PlayerObjectId	2110
+ GameSummaries: LeaderName	Lady Six Sky
+ GameSummaries: CivilizationType	CIVILIZATION_MAYA
+ GameSummaries: IsMajor	true
+ GameSummaries: TeamId	0
+ GameSummaries: IsHuman	true
+--]]
+
+local m_cachedVictories:table = {};
+
+function GetPlayerVictories(domain, leader_type)
+	--print("GetPlayerVictories", domain, leader_type);
+	-- don't process randoms
+	if leader_type == "RANDOM" or leader_type == "RANDOM_POOL1" or leader_type == "RANDOM_POOL2" then
+		return "", {};
+	end
+	-- check if already in the cache
+	if m_cachedVictories[leader_type] then
+		return m_cachedVictories[leader_type][1], m_cachedVictories[leader_type][2];
+	end
+	--print("GetPlayerVictories_actual", domain, leader_type);
+	-- fetch victories from the HallofFame
+	local vicIcons, vicTypes = "", {};
+	local games = HallofFame.GetGames("RULESET_EXPANSION_2"); -- RULESET_STANDARD, RULESET_EXPANSION_1
+	for _,game in ipairs(games) do
+		if game.VictorTeamId == 0 and game.Players and game.Players[1].LeaderType == leader_type then -- VictorTeamId is nil if nobody won, and != 0 if others won
+			local isVic:boolean = false;
+			for _,vic in ipairs(vicTypes) do
+				if vic == game.VictoryType then
+					isVic = true;
+					break;
+				end
+			end
+			if not isVic then
+				table.insert(vicTypes, game.VictoryType);
+				vicIcons = vicIcons..g_victoryIcons[game.VictoryType];
+			end
+		end
+	end
+	m_cachedVictories[leader_type] = {vicIcons, vicTypes};
+	return vicIcons, vicTypes;
 end
 
 function GenerateToolTipFromPlayerInfo(info)
@@ -1190,6 +1279,8 @@ function SetupLeaderPulldown(
 				info.PlayerColorIndex = colorIndex;
 				
 				m_currentInfo = info;
+				-- 230416 update victories also
+				v.VictoryIcons, v.VictoryTypes = GetPlayerVictories(v.Domain, v.Value);
 			end
 
 			if(refresh) then
@@ -1205,7 +1296,11 @@ function SetupLeaderPulldown(
 						local err = v.InvalidReason or "LOC_SETUP_ERROR_INVALID_OPTION";
 						caption = caption .. "[NEWLINE][COLOR_RED](" .. Locale.Lookup(err) .. ")[ENDCOLOR]";
 					end
-
+					-- 230416 victories feature
+					if v.VictoryIcons and v.VictoryIcons ~= "" then
+						caption = caption.." "..v.VictoryIcons;
+					end
+					
 					if scrollText then 
 						scrollText:SetText(caption);
 					else
@@ -1279,6 +1374,12 @@ function SetupLeaderPulldown(
 				end;
 
 				for i,v in ipairs(values) do -- 230412 where the values come from???
+					-- 230416 fetch data about victories and add to the table for later
+					--local info = GetPlayerInfo(domain, v.Value); -- need to extend this method
+					--if not v.VictoryIcons then
+					v.VictoryIcons, v.VictoryTypes = GetPlayerVictories(v.Domain, v.Value); -- this is called many times for the same leader
+					--dshowrectable(v);
+					--end
 					g_leaderParameters[v.Value] = v;
 				--[[
 AdvancedSetup: Domain	Players:Expansion2_Players
@@ -1302,7 +1403,11 @@ AdvancedSetup: RawName	LOC_LEADER_ALEXANDER_NAME
 						local err = v.InvalidReason or "LOC_SETUP_ERROR_INVALID_OPTION";
 						caption = caption .. "[NEWLINE][COLOR_RED](" .. Locale.Lookup(err) .. ")[ENDCOLOR]";
 					end
-
+					-- 230416 victories feature
+					if v.VictoryIcons ~= "" then
+						caption = caption.." "..v.VictoryIcons;
+					end
+					
 					local backColor, frontColor = UI.GetPlayerColorValues(icons.PlayerColor, 0);
 					if(backColor and frontColor and backColor ~= 0 and frontColor ~= 0) then
 						entry.CivIcon:SetSizeVal(36,36);

@@ -1169,7 +1169,7 @@ end
 -- TODO: add a local table of all instances, and attach search box to it via on/off only
 -- do not rebuild anything, just show on and off
 function RefreshPlayerSlots()
-	print("RefreshPlayerSlots()");
+	--print("RefreshPlayerSlots()");
 	RebuildPlayerParameters();
 	m_NonLocalPlayerSlotManager:ResetInstances();
 
@@ -1311,7 +1311,7 @@ end
 
 -- ===========================================================================
 function GameSetup_PlayerCountChanged()
-	print("Player Count Changed");
+	--print("Player Count Changed");
 	RefreshPlayerSlots();
 end
 
@@ -1716,16 +1716,6 @@ end
 -- 230416 Search feature; original code from Civilopedia
 -- ===========================================================================
 
--- debug routine - prints a table, and tables inside recursively (up to 5 levels)
-function dshowrectable(tTable:table, iLevel:number)
-	local level:number = 0;
-	if iLevel ~= nil then level = iLevel; end
-	for k,v in pairs(tTable) do
-		print(string.rep("---:",level), k, type(v), tostring(v));
-		if type(v) == "table" and level < 5 then dshowrectable(v, level+1); end
-	end
-end
-
 local LL = Locale.Lookup;
 local LOC_TREE_SEARCH_W_DOTS = LL("LOC_TREE_SEARCH_W_DOTS");
 local _SearchQuery = nil;
@@ -1802,20 +1792,25 @@ function OnSearchCharCallback()
 					-- v[2] Line1 leader & civ
 					-- v[3] Line2 uniques
 					local instance = _SearchResultsManager:GetInstance();
+					local leaderParam:table = g_leaderParameters[v[1]];
 
 					-- Search results already localized.
-					instance.Text:SetText(v[2].."[NEWLINE]"..v[3]);
-
+					if leaderParam then
+						instance.Text:SetText(v[2].." "..leaderParam.VictoryIcons.."[NEWLINE]"..v[3]);
+					else
+						instance.Text:SetText(v[2].."[NEWLINE]"..v[3]);
+					end
+					
 					local icons = GetPlayerIcons("Players:Expansion2_Players", v[1]); -- TODO: DOMAIN
 					instance.Icon:SetIcon(icons.LeaderIcon);
 					
-					if g_leaderParameters[v[1]] then
+					if leaderParam then
 						instance.Button:RegisterCallback(Mouse.eLClick, function() 
 							Controls.SearchResultsPanelContainer:SetHide(true);
 							_SearchQuery = nil;
 							local parameter = parameters.Parameters["PlayerLeader"];
-							parameters:SetParameterValue(parameter, g_leaderParameters[v[1]]);
-						end );
+							parameters:SetParameterValue(parameter, leaderParam);
+						end);
 					end
 					
 					instance.Button:RegisterCallback( Mouse.eMouseEnter, function() 
