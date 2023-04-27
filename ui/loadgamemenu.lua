@@ -263,6 +263,9 @@ function OnShow()
 	Controls.DecoContainer:SetSizeY(decoSize - (count * 25) - count);	
 
 	SetupFileList();
+	
+	-- 230418 search feature
+	Controls.SearchEditBox:TakeFocus();
 end
 
 function OnHide()
