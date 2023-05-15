@@ -835,14 +835,14 @@ g_ParameterFactories["Map"] = function(o, parameter)
 	
 	-- 230515 #3 Pulldown version
 	table.insert(drivers, CreatePulldownDriver(o, parameter, Controls.CreateGame_MapType, Controls.CreateGame_MapTypeContainer));
-	drivers[1].BaseUpdateValues = drivers[1].UpdateValues;
+	drivers[1].BaseUpdateValues = drivers[1].UpdateValues; -- store original pulldown function - it is quite complex
 	drivers[1].UpdateValues = function(values)
-		table.sort(values, SortMapsByName);
+		table.sort(values, SortMapsByName); -- add sorting before calling the actual update
 		drivers[1].BaseUpdateValues(values);
 	end
 
 	-- Basic setup version.
-	table.insert(drivers, CreateSimpleMapPopupDriver(o, parameter) );
+	--table.insert(drivers, CreateSimpleMapPopupDriver(o, parameter) ); -- not used anymore
 	
 	-- Advanced setup version.	
 	table.insert( drivers, CreateButtonPopupDriver(o, parameter, OnMapSelect) );
