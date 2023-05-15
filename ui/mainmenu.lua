@@ -1,4 +1,4 @@
-print("Loading mainmenu.lua from Better FrontEnd (UI)");
+print("BFE: Loading mainmenu.lua from Better FrontEnd (UI) v1.0");
 
 include("InstanceManager");
 include("LobbyTypes"); --MPLobbyMode
@@ -1509,4 +1509,4 @@ function Initialize()
 end
 Initialize();
 
-print("OK loaded mainmenu.lua from Better FrontEnd (UI)");
+print("BFE: Loaded mainmenu.lua");

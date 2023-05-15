@@ -1,4 +1,4 @@
-print("Loading loadgamemenu.lua from Better FrontEnd (UI)");
+print("BFE: Loading loadgamemenu.lua from Better FrontEnd (UI) v1.0");
 
 include( "InstanceManager" );
 include( "SupportFunctions" );
@@ -292,7 +292,7 @@ end
 function OnDeleteYes()
 	m_kPopupDialog:Close();
 	if (g_iSelectedFileEntry ~= -1) then
-		local kSelectedFile = g_FileList[ g_iSelectedFileEntry ];		
+		local kSelectedFile = g_FileList[ g_iSelectedFileEntry ];
 		UI.DeleteSavedGame( kSelectedFile );
 	end
 	
@@ -592,4 +592,4 @@ function Initialize()
 end
 Initialize();
 
-print("Loading loadgamemenu.lua from Better FrontEnd (UI)");
+print("BFE: Loaded loadgamemenu.lua");

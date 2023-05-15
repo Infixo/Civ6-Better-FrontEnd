@@ -1,4 +1,5 @@
-print("Loading LoadSaveMenu_Shared.lua from Better FrontEnd");
+print("BFE: Loading loadsavemenu_shared.lua from Better FrontEnd (UI) v1.0");
+
 include( "SupportFunctions" );
 include( "Colors") ;
 
@@ -40,6 +41,20 @@ g_FilenameIsValid = false;
 g_DontUpdateFileName = false;
 
 g_SearchQuery = nil; -- 230411 search pattern
+
+----------------------------------------------------------------        
+-- debug routine - prints a table, and tables inside recursively (up to 3 levels)
+----------------------------------------------------------------        
+function dshowtable(tTable:table, iLevel:number)
+	local level:number = 0;
+	if iLevel ~= nil then level = iLevel; end
+	for k,v in pairs(tTable) do
+		if level == 0 then     print(                                   k, type(v), tostring(v));
+		elseif level == 1 then print(                           ":...", k, type(v), tostring(v));
+		else                   print(string.rep(":  ",level-1), ":...", k, type(v), tostring(v)); end
+		if type(v) == "table" and level < 3 then dshowtable(v, level+1); end
+	end
+end
 
 ----------------------------------------------------------------        
 -- File Name Handling
@@ -383,12 +398,12 @@ function UpdateGameType()
 end
 
 ----------------------------------------------------------------        
----------------------------------------------------------------- 
+----------------------------------------------------------------
 function GetDisplayName(entry:table)
 
-	if entry.IsDirectory == nil or entry.IsDirectory == false then		
+	if entry.IsDirectory == nil or entry.IsDirectory == false then
 		if entry.DisplayName ~= nil and #entry.DisplayName > 0 then
-			return entry.DisplayName
+			return entry.DisplayName;
 		else
 			if entry.Location == SaveLocations.LOCAL_STORAGE then
 				return Path.GetFileNameWithoutExtension(entry.Name);
@@ -399,6 +414,24 @@ function GetDisplayName(entry:table)
 	else
 		return entry.Name;
 	end
+end
+
+----------------------------------------------------------------
+-- 230515 #5 Build a file tooltip
+function GetFileToolTip(entry:table)
+	if entry.IsDirectory then return "This is a directory"; end
+	local tt: table = {};
+	table.insert(tt, "Civilization: "..Locale.LookupBundle(entry.HostCivilizationName));
+	table.insert(tt, "Leader: "..Locale.LookupBundle(entry.HostLeaderName));
+	table.insert(tt, "Turn: "..tostring(entry.CurrentTurn));
+	table.insert(tt, "Era: "..Locale.LookupBundle(entry.HostEraName));
+	if entry.MapScriptName then table.insert(tt, "Map: "..Locale.LookupBundle(entry.MapScriptName));
+	else                        table.insert(tt, "Map: (unknown)"); end
+	table.insert(tt, "Size: "..Locale.LookupBundle(entry.MapSizeName));
+	table.insert(tt, "Ruleset: "..Locale.LookupBundle(entry.RulesetName));
+	table.insert(tt, "Difficulty: "..Locale.LookupBundle(entry.HostDifficultyName));
+	table.insert(tt, "Speed: "..Locale.LookupBundle(entry.GameSpeedName));
+	return table.concat(tt, "[NEWLINE]");
 end
 
 ----------------------------------------------------------------        
@@ -907,7 +940,7 @@ function RebuildFileList()
 		else
 			v.DisplayName = GetDisplayName(v); -- 230411 here is an actual name created
 		end
-	
+		
 		v.LastModified = UI.GetSaveGameModificationTimeRaw(v);
 	end
 	table.sort(g_FileList, g_CurrentSort);
@@ -926,18 +959,20 @@ function RebuildFileList()
 		SetSelected(i);
 		OnActionButton();
 	end
-
+	
 	g_FileEntryInstanceList = {}; -- 230411 to speed up use this table and just show on/off
 
 	local instance_index = 1;
 	function per_entry(entry)
+		-- 230515 #5 Here the entry table contains the file data
 		local controlTable = g_FileEntryInstanceManager:GetInstance();
 		g_FileEntryInstanceList[instance_index] = controlTable;
 		TruncateString(controlTable.ButtonText, controlTable.Button:GetSizeX()-60, entry.DisplayName);
 		controlTable.Button:SetVoid1( instance_index );
 		controlTable.Button:RegisterCallback( Mouse.eMouseEnter, OnMouseEnter);
 		controlTable.Button:RegisterCallback( Mouse.eLClick, SetSelected );
-		controlTable.Button:RegisterCallback( Mouse.eLDblClick, OnDoubleClick); 
+		controlTable.Button:RegisterCallback( Mouse.eLDblClick, OnDoubleClick);
+		controlTable.Button:SetToolTipString( GetFileToolTip(entry) ); -- 230515 #5 File tooltip
 
 		instance_index = instance_index + 1;
 	end
@@ -1186,10 +1221,14 @@ end
 function RefreshFileListWithFilter()
 	if g_FileEntryInstanceList == nil then return; end -- nothing to filter
 	for idx,instance in pairs(g_FileEntryInstanceList) do
-		if g_SearchQuery == nil or string.find(instance.ButtonText:GetText(), g_SearchQuery) ~= nil then
+		if g_SearchQuery == nil
+			or string.find(instance.ButtonText:GetText(), g_SearchQuery) ~= nil
+			or string.find(instance.Button:GetToolTipString(), g_SearchQuery) ~= nil then -- 230515 #5 Search by various game parameters
 			instance.InstanceRoot:SetShow(true);
 		else
 			instance.InstanceRoot:SetHide(true);
 		end
 	end
 end
+
+print("BFE: Loaded loadsavemenu_shared.lua");
