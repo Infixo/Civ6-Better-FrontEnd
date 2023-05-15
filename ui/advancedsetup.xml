@@ -118,15 +118,15 @@
 									</Container>
 
 									<!-- Map Type - Pulldown - by default used only for scenarios -->
-									<Container ID="CreateGame_MapTypeContainer" Size="parent+10,65" Hidden="1">
+									<Container ID="CreateGame_MapTypeContainer" Size="parent+10,65"> <!-- 230515 #3 Show the pulldown version -->
 										<Box Color="62,152,203,20" Anchor="C,B" Size="parent,30">
 											<Label Anchor="C,T" Style="ShellSubHeaderText" String="{LOC_SETUP_MAP_TYPE:upper}" AnchorSide="I,O"/>
 											<PullDown ID="CreateGame_MapType" Anchor="C,C" Style="PullDownBlue" ScrollThreshold="350" Size="220,24"/>
 										</Box>
 									</Container>
-
+									
 									<!-- Map Type - Button -->
-									<Container ID="CreateGame_MapSelectContainer" Size="parent+10,65">
+									<Container ID="CreateGame_MapSelectContainer" Size="parent+10,65" Hidden="1"> <!-- 230515 #3 Hide the button version -->
 										<Box Color="62,152,203,20" Anchor="C,B" Size="parent,30">
 											<Label Anchor="C,T" Style="ShellSubHeaderText" String="{LOC_SETUP_MAP_TYPE:upper}" AnchorSide="I,O"/>
 											<GridButton ID="MapSelectButton" Anchor="C,C" Style="ButtonControl" Size="219,24" String="LOC_SETUP_MAP_MAP_SELECT" TruncateWidth="205" TruncateTooltip="1"/>

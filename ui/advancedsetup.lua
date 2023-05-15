@@ -1,4 +1,4 @@
-print("Loading advancedsetup.lua from Better FrontEnd (UI)");
+print("BFE: Loading advancedsetup.lua from Better FrontEnd (UI) v1.0");
 
 -- ===========================================================================
 --	Single Player Create Game w/ Advanced Options
@@ -44,6 +44,19 @@ local m_BasicTooltipData			:table = {};
 local m_WorldBuilderImport          :boolean = false;
 
 local m_pWarningPopup:table = PopupDialog:new("CityStateWarningPopup");
+
+-- ===========================================================================
+-- debug routine - prints a table, and tables inside recursively (up to 3 levels)
+function dshowtable(tTable:table, iLevel:number)
+	local level:number = 0;
+	if iLevel ~= nil then level = iLevel; end
+	for k,v in pairs(tTable) do
+		if level == 0 then     print(                                   k, type(v), tostring(v));
+		elseif level == 1 then print(                           ":...", k, type(v), tostring(v));
+		else                   print(string.rep(":  ",level-1), ":...", k, type(v), tostring(v)); end
+		if type(v) == "table" and level < 3 then dshowtable(v, level+1); end
+	end
+end
 
 -- ===========================================================================
 -- Override hiding game setup to release simplified instances.
@@ -819,6 +832,14 @@ g_ParameterFactories["Map"] = function(o, parameter)
     if (m_WorldBuilderImport) then
         return drivers;
     end
+	
+	-- 230515 #3 Pulldown version
+	table.insert(drivers, CreatePulldownDriver(o, parameter, Controls.CreateGame_MapType, Controls.CreateGame_MapTypeContainer));
+	drivers[1].BaseUpdateValues = drivers[1].UpdateValues;
+	drivers[1].UpdateValues = function(values)
+		table.sort(values, SortMapsByName);
+		drivers[1].BaseUpdateValues(values);
+	end
 
 	-- Basic setup version.
 	table.insert(drivers, CreateSimpleMapPopupDriver(o, parameter) );
@@ -1259,6 +1280,7 @@ end
 -- ===========================================================================
 -- Called every time parameters have been refreshed.
 -- This is a useful spot to perform validation.
+-- 230515 #4 TODO: add update of the search list when a ruleset changes
 function UI_PostRefreshParameters()
 	-- Most of the options self-heal due to the setup parameter logic.
 	-- However, player options are allowed to be in an 'invalid' state for UI
@@ -1344,6 +1366,7 @@ function OnShow()
 	RefreshPlayerSlots();	-- Will trigger a game parameter refresh.
 	AutoSizeGridButton(Controls.DefaultButton,133,36,15,"H");
 	AutoSizeGridButton(Controls.CloseButton,133,36,10,"H");
+	
 	-- the map size and type dropdowns don't make sense on a map import
 
     if (m_WorldBuilderImport) then
@@ -1749,7 +1772,7 @@ function PopulateSearchData()
 		local info = GetPlayerInfo(domain, row.LeaderType);
 		-- Fields: LeaderType, LeaderName, CivilizationName, Uniques[Name,Description], LeaderAbility[Name,Description], CivilizationAbility[Name,Description]
 		--print("***** INFO *****", row.LeaderType);
-		--dshowrectable(info);
+		--dshowtable(info);
 		local line1:string = string.format("%s (%s)", LL(info.LeaderName), LL(info.CivilizationName));
 		local uniques:table = {};
 		for _,item in ipairs(info.Uniques) do
@@ -1868,8 +1891,12 @@ function Initialize()
 	Controls.LoadConfig:RegisterCallback( Mouse.eMouseEnter, function() UI.PlaySound("Main_Menu_Mouse_Over"); end);
 	Controls.SaveConfig:RegisterCallback( Mouse.eLClick, OnSaveConfig );
 	Controls.SaveConfig:RegisterCallback( Mouse.eMouseEnter, function() UI.PlaySound("Main_Menu_Mouse_Over"); end);
-	Controls.MapSelectButton:RegisterCallback( Mouse.eLClick, OnMapSelect );
-	Controls.MapSelectButton:RegisterCallback( Mouse.eMouseEnter, function() UI.PlaySound("Main_Menu_Mouse_Over"); end);
+	-- 230515 #3 Open map selector when R-click on the pulldown
+	Controls.CreateGame_MapType:GetButton():RegisterCallback( Mouse.eRClick, OnMapSelect )
+	Controls.CreateGame_MapType:GetButton():RegisterCallback( Mouse.eMouseEnter, function() UI.PlaySound("Main_Menu_Mouse_Over"); end);
+	-- 230515 #3 The old button is hidden anyway
+	--Controls.MapSelectButton:RegisterCallback( Mouse.eLClick, OnMapSelect );
+	--Controls.MapSelectButton:RegisterCallback( Mouse.eMouseEnter, function() UI.PlaySound("Main_Menu_Mouse_Over"); end);
 	Controls.ConflictConfirmButton:RegisterCallback( Mouse.eLClick, function() Controls.ConflictPopup:SetHide(true); end);
 	Controls.ConflictConfirmButton:RegisterCallback( Mouse.eMouseEnter, function() UI.PlaySound("Main_Menu_Mouse_Over"); end);
 	
@@ -1893,4 +1920,4 @@ function Initialize()
 end
 Initialize();
 
-print("BFE: Loaded advancedsetup.lua OK");
+print("BFE: Loaded advancedsetup.lua");
