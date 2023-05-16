@@ -1,4 +1,4 @@
-print("Loading playersetuplogic.lua from Better FrontEnd (UI)");
+print("BFE: Loading playersetuplogic.lua from Better FrontEnd (UI) v1.0");
 
 -------------------------------------------------
 -- Player Setup Logic
@@ -35,12 +35,14 @@ g_victoryIcons = {
 -------------------------------------------------------------------------------
 -- Debug routine - prints a table, and tables inside recursively (up to 5 levels)
 -------------------------------------------------------------------------------
-function dshowrectable(tTable:table, iLevel:number)
+function dshowtable(tTable:table, iLevel:number)
 	local level:number = 0;
 	if iLevel ~= nil then level = iLevel; end
 	for k,v in pairs(tTable) do
-		print(string.rep("---:",level), k, type(v), tostring(v));
-		if type(v) == "table" and level < 5 then dshowrectable(v, level+1); end
+		if level == 0 then     print(                                    k, type(v), tostring(v));
+		elseif level == 1 then print(                            ":...", k, type(v), tostring(v));
+		else                   print(string.rep(":   ",level-1)..":...", k, type(v), tostring(v)); end
+		if type(v) == "table" and level < 5 then dshowtable(v, level+1); end
 	end
 end
 
@@ -271,7 +273,7 @@ function GetPlayerParameterError(playerId)
 					if(isPreGame) then
 						if(max_unique_players and (unique_leaders or unique_civilizations)) then
 							if(player_count > max_unique_players) then
-								--print("Player Count - " .. player_count .. " Max Unique Players - " .. max_unique_players);
+								print("Player Count - " .. player_count .. " Max Unique Players - " .. max_unique_players);
 								return {Reason="LOC_SETUP_PLAYER_PARAMETER_ERROR"};
 							end
 						end
@@ -571,7 +573,6 @@ function GetPlayerIcons(domain, leader_type)
 end
 
 function GetPlayerInfo(domain, leader_type)
-	--print("GetPlayerInfo", domain, leader_type);
 	-- Kludge:  We're special casing random for now.
 	-- this will eventually change and 'RANDOM' will
 	-- be just another row in the players entry.
@@ -693,7 +694,6 @@ function GetPlayerInfo(domain, leader_type)
 			-- Ensure unique items are in the correct order.
 			table.sort(info.Uniques, function(a,b) return a.SortIndex < b.SortIndex; end);
 			
-
 			return info;
 		end
 	end
@@ -708,7 +708,6 @@ function GetPlayerInfo(domain, leader_type)
 end
 
 -- 230416 victories data from HallofFame
--- TODO: handle ruleset properly, as for now we will just show Expansion2
 -- HallofFame.GetGames is THE function to call
 --[[
  GameSummaries: GameId	27
@@ -739,22 +738,37 @@ Players:
  GameSummaries: IsHuman	true
 --]]
 
-local m_cachedVictories:table = {};
+local m_cachedVictories: table = {
+	["Players:StandardPlayers"]    = {},
+	["Players:Expansion1_Players"] = {},
+	["Players:Expansion2_Players"] = {},
+};
+
+-- 230516 #4 The relation between Ruleset and PlayerDomain is 1:1
+local m_playerDomainToRuleset: table = {
+	["Players:StandardPlayers"]    = "RULESET_STANDARD",
+	["Players:Expansion1_Players"] = "RULESET_EXPANSION_1",
+	["Players:Expansion2_Players"] = "RULESET_EXPANSION_2",
+};
 
 function GetPlayerVictories(domain, leader_type)
 	--print("GetPlayerVictories", domain, leader_type);
+	
 	-- don't process randoms
 	if leader_type == "RANDOM" or leader_type == "RANDOM_POOL1" or leader_type == "RANDOM_POOL2" then
 		return "", {};
 	end
+	
 	-- check if already in the cache
-	if m_cachedVictories[leader_type] then
-		return m_cachedVictories[leader_type][1], m_cachedVictories[leader_type][2];
+	if m_cachedVictories[domain][leader_type] then
+		return m_cachedVictories[domain][leader_type][1], m_cachedVictories[domain][leader_type][2];
 	end
-	--print("GetPlayerVictories_actual", domain, leader_type);
+	
 	-- fetch victories from the HallofFame
 	local vicIcons, vicTypes = "", {};
-	local games = HallofFame.GetGames("RULESET_EXPANSION_2"); -- RULESET_STANDARD, RULESET_EXPANSION_1
+	
+	-- 230516 #4 Get victories from the proper ruleset
+	local games = HallofFame.GetGames( m_playerDomainToRuleset[domain] and m_playerDomainToRuleset[domain] or "RULESET_STANDARD");
 	for _,game in ipairs(games) do
 		if game.VictorTeamId == 0 and game.Players and game.Players[1].LeaderType == leader_type then -- VictorTeamId is nil if nobody won, and != 0 if others won
 			local isVic:boolean = false;
@@ -1079,7 +1093,7 @@ function SetupLeaderPulldown(
 	local civIconBG = instance[civIconBGControlName];
 	local leaderIcon = instance[leaderIconControlName];
 	local scrollText = instance[scrollTextControlName];
-	local instanceManager = control["InstanceManager"]; -- PullDownInstanceManager:new( "InstanceOne", "Button", control ); -> 230412 these are all leaders?
+	local instanceManager = control["InstanceManager"];
 	
 	-- Jersey support
 	colorPullDownName = colorPullDownName or "ColorPullDown";
@@ -1363,7 +1377,7 @@ function SetupLeaderPulldown(
 			end
 
 			if(refresh) then
-				instanceManager:ResetInstances(); -- 230412 rebuild the pulldown
+				instanceManager:ResetInstances();
 				g_playerInstances = {}; -- 230402 search bar
 				g_leaderParameters = {}; -- 230416 search feature
 
@@ -1373,13 +1387,10 @@ function SetupLeaderPulldown(
 					DisplayCivLeaderToolTip(m_currentInfo, tooltipControls, not hasPlacard);
 				end;
 
-				for i,v in ipairs(values) do -- 230412 where the values come from???
+				for i,v in ipairs(values) do
+				
 					-- 230416 fetch data about victories and add to the table for later
-					--local info = GetPlayerInfo(domain, v.Value); -- need to extend this method
-					--if not v.VictoryIcons then
 					v.VictoryIcons, v.VictoryTypes = GetPlayerVictories(v.Domain, v.Value); -- this is called many times for the same leader
-					--dshowrectable(v);
-					--end
 					g_leaderParameters[v.Value] = v;
 				--[[
 AdvancedSetup: Domain	Players:Expansion2_Players
@@ -1391,12 +1402,10 @@ AdvancedSetup: Value	LEADER_ALEXANDER
 AdvancedSetup: Name	Alexander
 AdvancedSetup: RawName	LOC_LEADER_ALEXANDER_NAME
 				--]]
-					--print(i, "=========================");
-					--for k,vv in pairs(v) do print(k,vv) end
 					local icons = GetPlayerIcons(v.Domain, v.Value);
 
-					local entry = instanceManager:GetInstance(); -- 230412 store it somewhere?
-					table.insert(g_playerInstances, entry); -- 230412 search bar
+					local entry = instanceManager:GetInstance();
+					table.insert(g_playerInstances, entry); -- 230412 #4 search bar, store the control
 				
 					local caption = v.Name;
 					if(v.Invalid) then 
@@ -1635,4 +1644,4 @@ function RefreshPlayersListWithFilter()
 	end
 end
 
-print("Loaded playersetuplogic.lua from Better FrontEnd (UI)");
+print("BFE: Loaded playersetuplogic.lua");

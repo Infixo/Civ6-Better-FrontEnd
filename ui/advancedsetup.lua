@@ -46,15 +46,16 @@ local m_WorldBuilderImport          :boolean = false;
 local m_pWarningPopup:table = PopupDialog:new("CityStateWarningPopup");
 
 -- ===========================================================================
--- debug routine - prints a table, and tables inside recursively (up to 3 levels)
+-- Debug routine - prints a table, and tables inside recursively (up to 5 levels)
+-- ===========================================================================
 function dshowtable(tTable:table, iLevel:number)
 	local level:number = 0;
 	if iLevel ~= nil then level = iLevel; end
 	for k,v in pairs(tTable) do
-		if level == 0 then     print(                                   k, type(v), tostring(v));
-		elseif level == 1 then print(                           ":...", k, type(v), tostring(v));
-		else                   print(string.rep(":  ",level-1), ":...", k, type(v), tostring(v)); end
-		if type(v) == "table" and level < 3 then dshowtable(v, level+1); end
+		if level == 0 then     print(                                    k, type(v), tostring(v));
+		elseif level == 1 then print(                            ":...", k, type(v), tostring(v));
+		else                   print(string.rep(":   ",level-1)..":...", k, type(v), tostring(v)); end
+		if type(v) == "table" and level < 5 then dshowtable(v, level+1); end
 	end
 end
 
@@ -788,6 +789,12 @@ g_ParameterFactories["Ruleset"] = function(o, parameter)
 	-- Basic setup version.
 	-- Use an explicit table.
 	table.insert(drivers, CreatePulldownDriver(o, parameter, Controls.CreateGame_GameRuleset, Controls.CreateGame_RulesetContainer));
+	-- 230515 #4 Attach an extra call to update search data when the ruleset is updated
+	drivers[1].BaseUpdateValue = drivers[1].UpdateValue;
+	drivers[1].UpdateValue = function (value)
+		drivers[1].BaseUpdateValue(value); -- call the base function
+		PopulateSearchData();
+	end
 
 	-- Advanced setup version.
 	-- Create the parameter dynamically like we normally would...
@@ -842,7 +849,7 @@ g_ParameterFactories["Map"] = function(o, parameter)
 	end
 
 	-- Basic setup version.
-	--table.insert(drivers, CreateSimpleMapPopupDriver(o, parameter) ); -- not used anymore
+	--table.insert(drivers, CreateSimpleMapPopupDriver(o, parameter) ); -- 230515 #3 not used anymore
 	
 	-- Advanced setup version.	
 	table.insert( drivers, CreateButtonPopupDriver(o, parameter, OnMapSelect) );
@@ -1187,14 +1194,12 @@ end
 -- ===========================================================================
 -- 230412 this funnction is called in OnShow()
 -- it just works with raw controls and tons of params
--- TODO: add a local table of all instances, and attach search box to it via on/off only
--- do not rebuild anything, just show on and off
 function RefreshPlayerSlots()
-	--print("RefreshPlayerSlots()");
+
 	RebuildPlayerParameters();
 	m_NonLocalPlayerSlotManager:ResetInstances();
 
-	local player_ids = GameConfiguration.GetParticipatingPlayerIDs(); -- 230412 possible filter here?
+	local player_ids = GameConfiguration.GetParticipatingPlayerIDs();
 
 	local minPlayers = MapConfiguration.GetMinMajorPlayers() or 2;
 	local maxPlayers = MapConfiguration.GetMaxMajorPlayers() or 2;
@@ -1280,7 +1285,6 @@ end
 -- ===========================================================================
 -- Called every time parameters have been refreshed.
 -- This is a useful spot to perform validation.
--- 230515 #4 TODO: add update of the search list when a ruleset changes
 function UI_PostRefreshParameters()
 	-- Most of the options self-heal due to the setup parameter logic.
 	-- However, player options are allowed to be in an 'invalid' state for UI
@@ -1333,14 +1337,14 @@ end
 
 -- ===========================================================================
 function GameSetup_PlayerCountChanged()
-	--print("Player Count Changed");
+	print("Player Count Changed");
 	RefreshPlayerSlots();
 end
 
 -- ===========================================================================
 function OnShow()
 
-	 m_WorldBuilderImport = false;
+	m_WorldBuilderImport = false;
 	local bWorldBuilder = GameConfiguration.IsWorldBuilderEditor();
 
 	if (bWorldBuilder) then
@@ -1366,7 +1370,6 @@ function OnShow()
 	RefreshPlayerSlots();	-- Will trigger a game parameter refresh.
 	AutoSizeGridButton(Controls.DefaultButton,133,36,15,"H");
 	AutoSizeGridButton(Controls.CloseButton,133,36,10,"H");
-	
 	-- the map size and type dropdowns don't make sense on a map import
 
     if (m_WorldBuilderImport) then
@@ -1736,7 +1739,7 @@ end
 
 
 -- ===========================================================================
--- 230416 Search feature; original code from Civilopedia
+-- 230416 #4 Search feature; original code from Civilopedia
 -- ===========================================================================
 
 local LL = Locale.Lookup;
@@ -1749,7 +1752,6 @@ local _SearchResultsManager = InstanceManager:new("SearchResultInstance", "Root"
 -------------------------------------------------------------------------------
 
 function PopulateSearchData()
-	print("PopulateSearchData()");
 	
 	-- Populate Full Text Search
 	local searchContext = "Leaders";
@@ -1758,8 +1760,17 @@ function PopulateSearchData()
 		print("BFE: Failed to create a search context.");
 		return;
 	end
-
-	local domain = "Players:Expansion2_Players"; -- TODO: where does the domain come from?
+	
+	OnSearchBarGainFocus(); -- hide any ongoing searches
+	
+	-- 230516 #4 Update the seach data with a proper ruleset
+	local domain = "Players:StandardPlayers"; -- 250515 #4 Default ruleset
+	if g_GameParameters then 
+		local ruleset: string = g_GameParameters.Parameters.Ruleset.Value.Value; -- yes, 1st Value is a table and 2nd Value is the actual value
+		-- maybe there is a programmatic way of getting this...
+		local results: table = CachedQuery("SELECT Domain FROM RulesetDomainOverrides WHERE Ruleset = ? AND ParameterId = 'PlayerLeader' LIMIT 1", ruleset);
+		if results and results[1] then domain = results[1].Domain; end
+	end
 	local info_query = "SELECT LeaderType FROM Players WHERE Domain = ?";
 	local info_results = CachedQuery(info_query, domain);
 
@@ -1767,12 +1778,10 @@ function PopulateSearchData()
 		print("BFE: Failed to read Leaders from Players config table.");
 		return;
 	end
-			
+
 	for i,row in ipairs(info_results) do
 		local info = GetPlayerInfo(domain, row.LeaderType);
 		-- Fields: LeaderType, LeaderName, CivilizationName, Uniques[Name,Description], LeaderAbility[Name,Description], CivilizationAbility[Name,Description]
-		--print("***** INFO *****", row.LeaderType);
-		--dshowtable(info);
 		local line1:string = string.format("%s (%s)", LL(info.LeaderName), LL(info.CivilizationName));
 		local uniques:table = {};
 		for _,item in ipairs(info.Uniques) do
@@ -1784,7 +1793,6 @@ function PopulateSearchData()
 		-- v[1] == LeaderType
 		-- v[2] == Name and Civilization
 		-- v[3] == Uniques
-		--print("AddData", info.LeaderType, line1, line2);
 	end
 	Search.Optimize(searchContext);
 end
@@ -1910,11 +1918,10 @@ function Initialize()
     LuaEvents.CityStatePicker_SetParameterValue.Add(OnSetParameterValue);
 	LuaEvents.LeaderPicker_SetParameterValues.Add(OnSetParameterValues);
 
-	-- 230416 Search feature
+	-- 230416 #4 Search feature
 	Controls.SearchEditBox:RegisterStringChangedCallback(OnSearchCharCallback);
 	Controls.SearchEditBox:RegisterHasFocusCallback(OnSearchBarGainFocus);
 	Controls.SearchEditBox:RegisterCommitCallback(OnSearchCommitCallback); -- EditMode also automatically calls the commit callback when the EditBox loses focus.
-	PopulateSearchData();
 
 	Resize();
 end
