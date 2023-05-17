@@ -9,16 +9,19 @@
 		<CompatibleVersions>2.0</CompatibleVersions>
 	</Properties>
 	<FrontEndActions>
-		<ImportFiles id="BFE_FrontEnd_ImportFiles">
+		<ImportFiles id="BFE_FrontEnd_ImportFiles_1">
 			<Properties><LoadOrder>1</LoadOrder></Properties>
-			<File>ui/advancedsetup.lua</File>
-			<File>ui/advancedsetup.xml</File>
 			<File>ui/loadgamemenu.lua</File>
 			<File>ui/loadgamemenu.xml</File>
 			<File>ui/loadsavemenu_shared.lua</File>
 			<File>ui/mainmenu.lua</File>
 			<File>ui/mainmenu.xml</File>
 			<File>ui/playersetuplogic.lua</File>
+		</ImportFiles>
+		<ImportFiles id="BFE_FrontEnd_ImportFiles_2">
+			<Properties><LoadOrder>1000003</LoadOrder></Properties> <!-- higher than YNAMP -->
+			<File>ui/advancedsetupbfe.lua</File>
+			<File>ui/advancedsetupbfe.xml</File>
 		</ImportFiles>
 	</FrontEndActions>
 	<!--
@@ -32,8 +35,8 @@
 	-->
 	<Files>
 		<!-- FronEnd -->
-		<File>ui/advancedsetup.lua</File>
-		<File>ui/advancedsetup.xml</File>
+		<File>ui/advancedsetupbfe.lua</File>
+		<File>ui/advancedsetupbfe.xml</File>
 		<File>ui/loadgamemenu.lua</File>
 		<File>ui/loadgamemenu.xml</File>
 		<File>ui/loadsavemenu_shared.lua</File>

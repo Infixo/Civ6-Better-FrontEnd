@@ -15,6 +15,10 @@
 				<Grid Style="ShellHeaderButtonGrid">
 					<GridButton ID="DefaultButton" Style="ShellButtonOrnateFlat" Anchor="L,C" Size="300,parent" Offset="1,0" String="{LOC_SETUP_RESTORE_DEFAULT:upper}" ToolTip="LOC_SETUP_RESTORE_DEFAULT_TT" />
 				</Grid>
+				<!-- 230517 #6 YnAMP added button -->
+				<Grid Style="ShellHeaderButtonGrid">
+					<GridButton ID="LoadDataYnAMP" Style="ShellButtonOrnateFlat" Anchor="R,C" Size="300,parent" Offset="1,0" String="{LOC_SETUP_LOAD_DATA_YNAMP:upper}" ToolTip="LOC_SETUP_LOAD_DATA_YNAMP_TT" Hidden="1"/>
+				</Grid>
 				<Grid Style="ShellHeaderButtonGrid">
 					<GridButton ID="CloseButton" Style="ShellButtonOrnateFlat" Anchor="R,C" Offset="1,0" String="LOC_MULTIPLAYER_BACK"/>
 				</Grid>
@@ -45,21 +49,13 @@
 									<Container  ID="CreateGame_LocalPlayerContainer" Size="parent+10,115" Hidden="1">
 										<Box Color="62,152,203,20" Anchor="C,B" Size="parent,87">
 											<Label Anchor="C,T" Style="ShellSubHeaderText" String="{LOC_SETUP_CIVILIZATION:upper}" AnchorSide="I,O"/> <!-- choose civilization-->
-											
 									
 											<!-- 230416 Search feature -->
-											<!--
-											<Grid Texture="Controls_Search2" SliceCorner="30,13" SliceTextureSize="41,26" Anchor="L,T" Offset="1,2" Size="325,26">
-												<EditBox ID="SearchEditBox" Style="FontNormal16" Anchor="L,C" Offset="24,0" Size="parent-10,16" MaxLength="20" CallOnChar="1" />
-											</Grid>
-											-->
-											
 											<Grid Style="Civilopedia_SearchPanel">
 												<Container Anchor="L,C" Offset="24,0" Size="parent-20,16" >
 													<EditBox ID="SearchEditBox" Style="Civilopedia_SearchEditBox" CallOnChar="1" /> <!-- <Civilopedia_SearchEditBox Style="FontNormal16" Size="parent,16" MaxLength="40" String="LOC_TREE_SEARCH_W_DOTS"/> -->
 												</Container>
 											</Grid>
-											
 											
 											<PullDown ID="Basic_LocalPlayerPulldown" Anchor="C,T" Offset="-1,15" Size="325,50" AutoSizePopup="1" ScrollThreshold="520" SpaceForScroll="15">
 												<ButtonData>
@@ -164,7 +160,7 @@
 
 							<!-- 230416 Search feature -->
 							<!-- This is after the scroll panel with the params so when visible it overlaps all other controls -->
-							<Container ID="SearchResultsPanelContainer" Anchor="L,T" Offset="0,120" Size="parent,auto" Hidden="1">
+							<Container ID="SearchResultsPanelContainer" Anchor="L,T" Offset="0,120" Size="parent,auto" Hidden="1" ConsumeMouse="1">
 								<ScrollPanel ID="SearchResultsPanel" Size="parent,500" Vertical="1" AutoScrollBar="1">
 									<ScrollBar Style="Slider_Blue" Anchor="R,C" AnchorSide="O,I"/>
 									<Grid Texture="Controls_OptionPanel" SliceCorner="3,3" SliceSize="10,52" SliceTextureSize="16,64" Size="parent,auto" AutoSizePadding="0,5">
@@ -181,6 +177,8 @@
 
 					<Container ID="BasicTooltipContainer" Size="340,670" Anchor="R,C" AnchorSide="O,I"/>
 					<Container ID="BasicPlacardContainer" Size="340,670" Anchor="L,C" AnchorSide="O,I"/>
+					<Container ID="BasicTooltipContainer2" Size="340,670" Anchor="R,C" AnchorSide="O,I" Hidden="1"/> <!-- copy to use with the search -->
+					<Container ID="BasicPlacardContainer2" Size="340,670" Anchor="L,C" AnchorSide="O,I" Hidden="1"/> <!-- copy to use with the search -->
 
 					<Container ID="GameModeTooltipContainer" Size="340,parent" Anchor="R,C" AnchorSide="O,I">
 					  <AlphaAnim					ID="GameModeToolTipAlpha" AlphaBegin="0" AlphaEnd="1" Speed="4" Function="Root" Cycle="Once" Size="parent,parent" Stopped="1">
@@ -360,6 +358,8 @@
 			<Stack ID="ButtonStack" Anchor="C,B" Padding="20" StackGrowth="Right">
 				<GridButton ID="LoadConfig" Size="260,45" Style="MainButton" Anchor="C,B" String="LOC_LOAD_CONFIG" Hidden="1"/>
 				<GridButton ID="SaveConfig" Size="260,45" Style="MainButton" Anchor="C,B" String="LOC_SAVE_CONFIG" Hidden="1"/>
+				<!-- 230517 #6 YnAMP added button -->
+				<GridButton ID="IgnoreWarning" Size="340,45" Style="MainButton" Anchor="C,B" String="LOC_SETUP_IGNORE_WARNING_YNAMP" ToolTip="LOC_SETUP_IGNORE_WARNING_YNAMP_TT"  Hidden="1"/>
 				<GridButton ID="StartButton" Size="340,45" Style="ButtonConfirm" Anchor="C,B" String="LOC_START_GAME" />
 			</Stack>
 

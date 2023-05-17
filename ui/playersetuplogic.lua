@@ -1611,37 +1611,4 @@ function GameSetup_ConfigurationChanged()
 	GameSetup_RefreshParameters();
 end
 
-----------------------------------------------------------------        
--- 230412 Search bar support
-
--- https://www.lua.org/pil/20.4.html
-function nocase(s)
-	return string.gsub(s, "%a",
-		function (c)
-			return string.format("[%s%s]", string.lower(c), string.upper(c))
-		end)
-end
-
-function SearchBarStringChanged(str:string)
-	local newSearch = nil;
-	if str and string.len(str) > 1 then
-		newSearch = nocase(str);
-	end
-	if newSearch ~= g_SearchQuery then
-		g_SearchQuery = newSearch;
-		RefreshPlayersListWithFilter();
-	end
-end
-
-function RefreshPlayersListWithFilter()
-	if g_playerInstances == nil then return; end -- nothing to filter
-	for _,instance in ipairs(g_playerInstances) do
-		if g_SearchQuery == nil or string.find(instance.ScrollText:GetText(), g_SearchQuery) ~= nil then
-			instance.Button:SetShow(true);
-		else
-			instance.Button:SetHide(true);
-		end
-	end
-end
-
 print("BFE: Loaded playersetuplogic.lua");
