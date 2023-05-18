@@ -42,10 +42,17 @@
 				  <Grid Texture="Controls_Search2" SliceCorner="30,13" SliceTextureSize="41,26" Offset="0,5" Size="parent,26">
 					<EditBox ID="SearchEditBox" Style="FontNormal16" Anchor="L,C" Offset="24,0" Size="parent-10,16" MaxLength="20" CallOnChar="1" />
 				  </Grid>
-                  <GridButton ID="AutoCheck" String="LOC_AUTOSAVES" Style="CheckBoxControl"  Size="340,24"/>
-                  <GridButton ID="CloudCheck" String="LOC_STEAMCLOUD" Style="CheckBoxControl" Size="340,24" Hidden="1">
+				  <!-- 230518 #8 new filters -->
+				  <Container Size="340,24">
+					<GridButton ID="OfficialCheck" Anchor="L,T" String="LOC_MODS_FIRAXIAN_CONTENT" Style="CheckBoxControl" Size="170,24"/>
+					<PullDown ID="TunerPullDown" Anchor="R,T" Style="PullDownBlue" Size="170,24" ScrollThreshold="110" AutoSizePopUp="1" SpaceForScroll="0" Offset="0,0"/>
+				  </Container>
+				  <Container Size="340,24"> <!-- 230518 #8 put 2 filters into 1 line to save space -->
+                    <GridButton ID="AutoCheck" String="LOC_AUTOSAVES" Style="CheckBoxControl"  Size="170,24" Anchor="L,T"/>
+                    <GridButton ID="CloudCheck" String="LOC_STEAMCLOUD" Style="CheckBoxControl" Size="170,24" Anchor="R,T" Hidden="1">
                       <Label ID="CheckNewIndicator" String="[ICON_New]" Anchor="L,T" Hidden="0"/>
-                  </GridButton>
+                    </GridButton>
+				  </Container>
                   <GridButton ID="CloudDummy" String="LOC_2K_CLOUD" Style="CheckBoxControl" TextColor="114,114,114,255" Size="340,24" Hidden="1">
                       <Label ID="DummyNewIndicator" String="[ICON_New]" Anchor="L,T" Hidden="0"/>
                   </GridButton>

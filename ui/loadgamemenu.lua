@@ -170,9 +170,12 @@ function OnShow()
 
 	g_ShowCloudSaves = false;
 	g_ShowAutoSaves = false;
+	g_ShowOfficialOnly = false;
+	g_ShowTuner = 1;
 
 	Controls.AutoCheck:SetSelected(false);
 	Controls.CloudCheck:SetSelected(false);
+	Controls.OfficialCheck:SetSelected(false);
 
 	local cloudEnabled = UI.AreCloudSavesEnabled() and not GameConfiguration.IsAnyMultiplayer() and g_FileType ~= SaveFileTypes.GAME_CONFIGURATION and g_GameType ~= SaveTypes.WORLDBUILDER_MAP and g_GameType ~= SaveTypes.TILED_MAP;
 	local cloudServicesEnabled,cloudServicesResult = UI.AreCloudSavesEnabled("LOAD");
@@ -232,6 +235,7 @@ function OnShow()
 	Controls.AutoCheck:SetHide(autoSavesDisabled);	
 
 	RefreshSortPulldown();
+	RefreshTunerPulldown();
 	InitializeDirectoryBrowsing();
 	SetupDirectoryBrowsePulldown();
 
@@ -241,11 +245,8 @@ function OnShow()
 	local directoryVisible = Controls.DirectoryPullDown:IsVisible();
     local dummyCloudVisible = Controls.CloudDummy:IsVisible();
 
-	local count:number = 0;
-	if(autoSavesVisible) then
-		count = count + 1;
-	end
-	if(cloudSavesVisible) then
+	local count:number = 1; -- 230518 #8 tuner and official filter are always visible
+	if autoSavesVisible or cloudSavesVisible then -- 230518 #8 merged into 1 line
 		count = count + 1;
 	end
 	if(sortByVisible) then
@@ -351,6 +352,14 @@ function OnCloudCheck( )
 	SetupDirectoryBrowsePulldown();
 	SetupFileList();
 	UpdateActionButtonState();
+end
+
+----------------------------------------------------------------        
+----------------------------------------------------------------
+function OnOfficialCheck()
+	g_ShowOfficialOnly = not g_ShowOfficialOnly;
+	Controls.OfficialCheck:SetSelected(g_ShowOfficialOnly);
+	SetupFileList();
 end
 
 
@@ -548,6 +557,7 @@ function Initialize()
 
 	AutoSizeGridButton(Controls.BackButton,133,36);
 	SetupSortPulldown();
+	SetupTunerPulldown(); -- 230518 #8 tuner filter
 	InitializeDirectoryBrowsing();
 	Resize();
 
@@ -576,6 +586,8 @@ function Initialize()
 	-- 230411 search bar
 	Controls.SearchEditBox:RegisterStringChangedCallback(OnSearchBarStringChanged);
 	Controls.SearchEditBox:RegisterHasFocusCallback(OnSearchBarHasFocus);
+	-- 230518 #8 tuner and content filters
+	Controls.OfficialCheck:RegisterCallback( Mouse.eLClick, OnOfficialCheck );
 
 	-- LUA Events
 	LuaEvents.HostGame_SetLoadGameServerType.Add( OnSetLoadGameServerType );

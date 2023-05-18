@@ -24,6 +24,8 @@ local m_GameModeNameIM		:table = InstanceManager:new("GameModeName", "Root");
 -- Global Variables
 g_ShowCloudSaves = false;
 g_ShowAutoSaves = false;
+g_ShowOfficialOnly = false; -- 230518 #8
+g_ShowTuner = 1; -- 230518 #8 '1' is All
 g_MenuType = 0;
 g_iSelectedFileEntry = -1;
 
@@ -197,6 +199,67 @@ function SetupSortPulldown()
 
 	RefreshSortPulldown();
 end
+
+
+
+---------------------------------------------------------------------------
+-- Tuner Pulldown setup
+-- Must exist below callback function names
+---------------------------------------------------------------------------
+local m_TunerOptions = {
+	{"{LOC_LOADSAVE_TUNER_ACTIVE_TITLE} {LOC_OPTIONS_ALL_AUTOSAVES}", 1},
+	{"{LOC_LOADSAVE_TUNER_ACTIVE_TITLE} {LOC_YES}", 2},
+	{"{LOC_LOADSAVE_TUNER_ACTIVE_TITLE} {LOC_NO}",  3},
+};
+
+
+---------------------------------------------------------------------------
+function RefreshTunerPulldown()
+	--[[
+	if g_GameType == SaveTypes.WORLDBUILDER_MAP then
+		sortStyle = Options.GetUserOption("Interface", "WorldBuilderMapBrowseSortDefault");
+	else
+		sortStyle = Options.GetUserOption("Interface", "SaveGameBrowseSortDefault");
+	end
+
+	-- Make sure it is valid
+	if sortStyle ~= 1 and sortStyle ~= 2 then
+		sortStyle = 1;
+	end
+	--]]
+	Controls.TunerPullDown:GetButton():LocalizeAndSetText(m_TunerOptions[g_ShowTuner][1]);
+end
+
+---------------------------------------------------------------------------
+function SetupTunerPulldown()
+	local tunerPulldown = Controls.TunerPullDown;
+	tunerPulldown:ClearEntries();
+	for i, v in ipairs(m_TunerOptions) do
+		local controlTable = {};
+		tunerPulldown:BuildEntry( "InstanceOne", controlTable );
+		controlTable.Button:LocalizeAndSetText(v[1]);
+	
+		controlTable.Button:RegisterCallback(Mouse.eLClick, function()
+			tunerPulldown:GetButton():LocalizeAndSetText( v[1] );
+			g_ShowTuner = v[2];
+			--[[
+			-- Store the default
+			if g_GameType == SaveTypes.WORLDBUILDER_MAP then
+				Options.SetUserOption("Interface", "WorldBuilderMapBrowseSortDefault", v[3]);
+			else
+				Options.SetUserOption("Interface", "SaveGameBrowseSortDefault", v[3]);
+			end
+	        Options.SaveOptions();--]]
+			RebuildFileList();
+		end);
+	
+	end
+	tunerPulldown:CalculateInternals();
+
+	RefreshTunerPulldown();
+end
+
+
 
 ----------------------------------------------------------------        
 -- Directory Browse
@@ -932,7 +995,21 @@ function ProcessEntries(entries, batch_count, per_entry_func, per_batch_func, po
 		return v ~= nil;
 	end
 end
-   
+
+--230518 #8 helper to find out if the file has community content required or not
+function IsFileOfficialOnly(fileInfo: table)
+	--print("IsFileOfficialOnly", fileInfo.Name);
+	-- Configuration files depend on the Enabled mods while other types depend on Required mods.
+	local mods: table = nil;
+	if g_FileType == SaveFileTypes.GAME_CONFIGURATION then mods = fileInfo.EnabledMods or {};
+	else                                                   mods = fileInfo.RequiredMods or {}; end
+	-- Iterate thrugh all entries
+	for i,v in ipairs(mods) do
+		if not Modding.IsModOfficial(v.Id) then return false; end -- Community content found
+	end
+	return true;
+end
+
 function RebuildFileList()
 	for i, v in ipairs(g_FileList) do
 		if(v.IsQuicksave) then
@@ -964,16 +1041,20 @@ function RebuildFileList()
 
 	local instance_index = 1;
 	function per_entry(entry)
-		-- 230515 #5 Here the entry table contains the file data
-		local controlTable = g_FileEntryInstanceManager:GetInstance();
-		g_FileEntryInstanceList[instance_index] = controlTable;
-		TruncateString(controlTable.ButtonText, controlTable.Button:GetSizeX()-60, entry.DisplayName);
-		controlTable.Button:SetVoid1( instance_index );
-		controlTable.Button:RegisterCallback( Mouse.eMouseEnter, OnMouseEnter);
-		controlTable.Button:RegisterCallback( Mouse.eLClick, SetSelected );
-		controlTable.Button:RegisterCallback( Mouse.eLDblClick, OnDoubleClick);
-		controlTable.Button:SetToolTipString( GetFileToolTip(entry) ); -- 230515 #5 File tooltip
-
+		-- 230518 #8 apply filters here
+		local filterOfficial: boolean = not g_ShowOfficialOnly or IsFileOfficialOnly(entry);
+		local filterTuner: boolean = (g_ShowTuner == 1) or ( (g_ShowTuner == 2 and entry.TunerActive) or (g_ShowTuner == 3 and not entry.TunerActive) );
+		if filterOfficial and filterTuner then
+			-- 230515 #5 Here the entry table contains the file data
+			local controlTable = g_FileEntryInstanceManager:GetInstance();
+			g_FileEntryInstanceList[instance_index] = controlTable;
+			TruncateString(controlTable.ButtonText, controlTable.Button:GetSizeX()-60, entry.DisplayName);
+			controlTable.Button:SetVoid1( instance_index );
+			controlTable.Button:RegisterCallback( Mouse.eMouseEnter, OnMouseEnter);
+			controlTable.Button:RegisterCallback( Mouse.eLClick, SetSelected );
+			controlTable.Button:RegisterCallback( Mouse.eLDblClick, OnDoubleClick);
+			controlTable.Button:SetToolTipString( GetFileToolTip(entry) ); -- 230515 #5 File tooltip
+		end -- if filter
 		instance_index = instance_index + 1;
 	end
 
@@ -1159,6 +1240,7 @@ LoadGameMenu: HostLeader	LEADER_ALEXANDER
 LoadGameMenu: IsAutosave	false
 LoadGameMenu: Path	D:/Users/Grzegorz/Documents/My Games/Sid Meier's Civilization VI/Saves/Single/ALEXANDER 121 med.Civ6Save
 LoadGameMenu: AccountReference	0
+LoadGameMenu: TunerActive true
 --]]
 
 ----------------------------------------------------------------        
