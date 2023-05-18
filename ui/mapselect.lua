@@ -1,3 +1,4 @@
+print("BFE: Loading mapselect.lua from Better FrontEnd (UI) v1.0");
 
 include("InstanceManager");
 
@@ -5,9 +6,9 @@ include("InstanceManager");
 -- Members
 -- ===========================================================================
 m_mapSelectorIM	=	InstanceManager:new("MapPreviewInstance",	"MapButton", Controls.MapSelectPanel);
-m_mapInfoIM =		InstanceManager:new("MapInfoInstance", "MapContainer", Controls.MapInfoPanel);
+--m_mapInfoIM =		InstanceManager:new("MapInfoInstance", "MapContainer", Controls.MapInfoPanel);
 
-local m_uiMapInfo		:table = {};
+--local m_uiMapInfo		:table = {};
 local m_kAllMaps		:table;
 local m_selectedMapValue :string;
 local m_lastSetMapValue	:string;
@@ -49,9 +50,9 @@ end
 -- ===========================================================================
 function OnMapButton(kMapData :table, c :table)
 	
-	m_uiMapInfo.MapName:SetText(Locale.Lookup(kMapData.RawName));
-	m_uiMapInfo.MapDescription:SetText(Locale.Lookup(kMapData.RawDescription));
-	m_uiMapInfo.MapImagePreview:SetTexture(kMapData.Texture);
+	--m_uiMapInfo.MapName:SetText(Locale.Lookup(kMapData.RawName));
+	--m_uiMapInfo.MapDescription:SetText(Locale.Lookup(kMapData.RawDescription));
+	--m_uiMapInfo.MapImagePreview:SetTexture(kMapData.Texture);
 	m_selectedMapValue = kMapData.Value;	
 
 	c:SetSelected(true);
@@ -98,8 +99,13 @@ function PopulateMapButton(kMapData:table)
 
 	local uiMap :table = m_mapSelectorIM:GetInstance();
 	uiMap.MapImagePreview:SetTexture(kMapData.Texture);
-	uiMap.MapName:SetText(Locale.Lookup(kMapData.RawName));
-	uiMap.MapButton:SetToolTipString(Locale.Lookup(kMapData.RawDescription));
+	-- 230518 #7 Add extra info to the name
+	local name: string = Locale.Lookup(kMapData.RawName);
+	if kMapData.IsOfficial then name = name.."[ICON_CheckmarkBlue]"; end
+	if kMapData.IsWorldBuilder then name = name.."[ICON_Charges]"; end
+	uiMap.MapName:SetText(name);
+	uiMap.MapDescription:SetText(Locale.Lookup(kMapData.RawDescription)); -- 230518 #7 Put description to the button
+	--uiMap.MapButton:SetToolTipString(Locale.Lookup(kMapData.RawDescription));
 	uiMap.MapButton:RegisterCallback( Mouse.eLClick, function() OnMapButton(kMapData, uiMap.MapButton); end );
 	uiMap.MapButton:RegisterCallback( Mouse.eLDblClick,function() m_selectedMapValue = kMapData.Value; OnSelectMapButton(); end);
 	uiMap.MapButton:SetSelected(false);
@@ -153,6 +159,8 @@ function Initialize()
 	LuaEvents.MapSelect_PopulatedMaps.Add( LoadMaps );
 	LuaEvents.MapSelect_ClearMapData.Add( ClearMapData );
 
-	m_uiMapInfo = m_mapInfoIM:GetInstance();
+	--m_uiMapInfo = m_mapInfoIM:GetInstance();
 end
 Initialize();
+
+print("BFE: Loaded mapselect.lua");

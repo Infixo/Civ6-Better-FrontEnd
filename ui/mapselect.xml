@@ -17,39 +17,42 @@
         <Grid Style="SubContainer4"  Size="parent-10,parent-100" Anchor="C,C" Color="45,75,110,255" Offset="0,5" InnerPadding="10,10">
           
           <!--Map Selection Grid (Left Side Panel)-->
-          <Grid ID="MapSelectionSection" Style="DecoGrid" Size="740,parent" Anchor="L,C" Color="30,66,96,255">
+          <!--<Grid ID="MapSelectionSection" Style="DecoGrid" Size="740,parent" Anchor="L,C" Color="30,66,96,255">-->
             <Stack Anchor="C,T" StackGrowth="Bottom" Padding ="5">
 
               <!--Map Sorting Options-->
               <Stack Anchor="C,T" StackGrowth="Left" Padding="20" Offset="0,6">
-                <GridButton ID="AllMapsButton" Style="ShellTabSmall"  Size="175,24" ToolTip="LOC_SETUP_MAP_ALL_MAPS_TOOLTIP">
-                  <RadioButton ID ="AllMapsSelector" RadioGroup="MapSorting" TextOffset="-5,0" String="LOC_SETUP_MAP_ALL_MAPS" AllowClickOff="1" Style="WhiteSemiBold14" TruncateWidth="145" TruncatedTooltip="1" Offset="4,0"	ButtonTexture="Controls_RadioButton.dds"	ButtonSize="18,18" CheckTexture="Controls_RadioButton.dds"	CheckSize="18,18" CheckTextureOffset="0,72"  Anchor="L,C" BoxOnLeft="1"/>
+                <GridButton ID="AllMapsButton" Style="ShellTabSmall" Size="200,24" ToolTip="LOC_SETUP_MAP_ALL_MAPS_TOOLTIP">
+                  <RadioButton ID ="AllMapsSelector" RadioGroup="MapSorting" TextOffset="-5,0" String="LOC_SETUP_MAP_ALL_MAPS" AllowClickOff="1" Style="WhiteSemiBold14" TruncateWidth="180" TruncatedTooltip="1" Offset="4,0"	ButtonTexture="Controls_RadioButton.dds"	ButtonSize="18,18" CheckTexture="Controls_RadioButton.dds"	CheckSize="18,18" CheckTextureOffset="0,72"  Anchor="L,C" BoxOnLeft="1"/>
                 </GridButton>
-                <GridButton ID="WorldBuilderMapsButton" Style="ShellTabSmall"  Size="175,24" ToolTip="LOC_SETUP_MAP_WORLD_BUILDER_MAPS_TOOLTIP">
-                  <RadioButton ID ="WorldBuilderMapsSelector" RadioGroup="MapSorting" TextOffset="-5,0" String="LOC_SETUP_MAP_WORLD_BUILDER_MAPS" AllowClickOff="1" Style="WhiteSemiBold14" TruncateWidth="145" TruncatedTooltip="1" Offset="4,0"	ButtonTexture="Controls_RadioButton.dds"	ButtonSize="18,18" CheckTexture="Controls_RadioButton.dds"	CheckSize="18,18" CheckTextureOffset="0,72"  Anchor="L,C" BoxOnLeft="1"/>
+                <GridButton ID="WorldBuilderMapsButton" Style="ShellTabSmall" Size="200,24" ToolTip="LOC_SETUP_MAP_WORLD_BUILDER_MAPS_TOOLTIP">
+                  <RadioButton ID ="WorldBuilderMapsSelector" RadioGroup="MapSorting" TextOffset="-5,0" String="{LOC_SETUP_MAP_WORLD_BUILDER_MAPS}[ICON_Charges]" AllowClickOff="1" Style="WhiteSemiBold14" TruncateWidth="180" TruncatedTooltip="1" Offset="4,0"	ButtonTexture="Controls_RadioButton.dds"	ButtonSize="18,18" CheckTexture="Controls_RadioButton.dds"	CheckSize="18,18" CheckTextureOffset="0,72"  Anchor="L,C" BoxOnLeft="1"/>
                 </GridButton>
-                <GridButton ID="OfficialMapsButton" Style="ShellTabSmall"  Size="175,24" ToolTip="LOC_SETUP_MAP_FIRAXIS_MAPS_TOOLTIP">
-                  <RadioButton ID ="OfficialMapsSelector" RadioGroup="MapSorting" TextOffset="-5,0" String="LOC_SETUP_MAP_OFFICIAL_MAPS" AllowClickOff="1" Style="WhiteSemiBold14" TruncateWidth="145" TruncatedTooltip="1" Offset="4,0"	ButtonTexture="Controls_RadioButton.dds"	ButtonSize="18,18" CheckTexture="Controls_RadioButton.dds"	CheckSize="18,18" CheckTextureOffset="0,72"  Anchor="L,C" BoxOnLeft="1"/>
+                <GridButton ID="OfficialMapsButton" Style="ShellTabSmall" Size="200,24" ToolTip="LOC_SETUP_MAP_FIRAXIS_MAPS_TOOLTIP">
+                  <RadioButton ID ="OfficialMapsSelector" RadioGroup="MapSorting" TextOffset="-5,0" String="{LOC_SETUP_MAP_OFFICIAL_MAPS}[ICON_CheckmarkBlue]" AllowClickOff="1" Style="WhiteSemiBold14" TruncateWidth="180" TruncatedTooltip="1" Offset="4,0"	ButtonTexture="Controls_RadioButton.dds"	ButtonSize="18,18" CheckTexture="Controls_RadioButton.dds"	CheckSize="18,18" CheckTextureOffset="0,72"  Anchor="L,C" BoxOnLeft="1"/>
                 </GridButton>
               </Stack>
-
-              <Line Start="10,1"			End="730,1"		Color="30,66,96,255" Width="2" />
+			
+              <!--<Line Start="10,1" End="730,1"		Color="30,66,96,255" Width="2" />-->
+              <Box Anchor="C,T" Size="parent-10,2" Color="30,66,96,255"/>
 
               <!--Maps Selection Scroll Panel-->
-              <ScrollPanel Anchor="L,T" ID="ParametersScrollPanel" Vertical="1" Size="Parent,Parent-43">
+              <ScrollPanel Anchor="L,T" Vertical="1" Size="Parent,Parent-43">
                 <Stack ID="MapSelectPanel" Anchor="C,T" Offset="0,0" Padding="7" StackGrowth="Right" WrapGrowth="Bottom" WrapWidth="parent"/>
-                <ScrollBar Style="Slider_Blue"  Anchor="R,C" Offset="5,0"/>
+                <ScrollBar Style="Slider_Blue" Anchor="R,C" Offset="5,0"/>
               </ScrollPanel>
             </Stack>
-          </Grid>
+          <!--</Grid>-->
 
           <!--Selected Map Info (Right Side Panel)-->
+		  <!-- 230518 #7 Not used
           <Grid ID="MapInfoPanel" Style="DecoGrid" Size="260,parent" Anchor="R,C" Color="30,66,96,255" StackGrowth="Bottom">
             <Grid ID ="MapInfoHeader" Size="parent,21" Texture="Shell_SectionHeader" SliceCorner="0,10" Color="20,144,140,100" Offset="0,6">
               <Image Texture="Controls_Gradient_HalfRadial" Color="20,144,140,100" FlipY="1" Anchor="C,T" Size="225,94"/>
               <Label Anchor="C,C" Style="ShellOptionText" WrapWidth="320" String="LOC_SETUP_MAP_MAP_INFO"/>
             </Grid>
           </Grid>
+		  -->
         </Grid>
 
         <Stack ID="ButtonStack" Anchor="C,B" Padding="20" StackGrowth="Right">
@@ -59,15 +62,21 @@
 
 
 	<!-- INSTANCES -->
-  <Instance Name="MapPreviewInstance">
-    <GridButton ID="MapButton" Anchor="C,T" Size="260,170" Texture="Controls_ButtonControl.dds" SliceCorner="10,10" SliceSize="1,1" SliceTextureSize="24,24" StateOffsetIncrement="0,24">
-      <Image ID="MapImagePreview" Anchor="C,T"  Offset="0,5" Texture="Map_4LeafClover" TextureOffset="0,0"/>
-      <Grid ID ="MapNameContainer" Anchor="C,B" Size="250,21" Texture="Shell_SectionHeader" SliceCorner="0,10" Color="20,55,190,100" Offset="0,5">
-        <Label ID ="MapName" Anchor="C,C" TruncateWidth="250" TruncatedTooltip="1"/>
-      </Grid>
-    </GridButton>
-  </Instance>
-
+	<Instance Name="MapPreviewInstance">
+		<GridButton ID="MapButton" Anchor="C,T" Size="260,250" Texture="Controls_ButtonControl.dds" SliceCorner="10,10" SliceSize="1,1" SliceTextureSize="24,24" StateOffsetIncrement="0,24">
+			<Image ID="MapImagePreview" Anchor="C,T" Offset="0,5" Texture="Map_4LeafClover" TextureOffset="0,0"/> <!-- this is a fixed size texture 250x? -->
+			<Grid Anchor="C,B" Size="250,20" Texture="Shell_SectionHeader" SliceCorner="0,10" Color="20,55,190,100" Offset="0,85">
+				<Label ID="MapName" Anchor="C,C" TruncateWidth="250" TruncatedTooltip="1" Offset="0,-3" Style="BlueGlow"/>
+			</Grid>
+			<Box Anchor="C,B" Size="250,80" Offset="0,5" Color="7,28,50,255">
+				<ScrollPanel Anchor="L,T" Offset="3,3" Size="parent-5,parent-5" Vertical="1" AutoScrollBar="1">
+					<Label ID="MapDescription" Anchor="L,T" WrapWidth="parent" String="LOC_MAP_CONTINENTS_DESCRIPTION"/>
+					<ScrollBar Style="Slider_Blue" Anchor="R,C" AnchorSide="O,I" Offset="-2,0"/>
+				</ScrollPanel>
+			</Box>
+		</GridButton>
+	</Instance>
+  <!-- 230518 #7 Not used
   <Instance Name="MapInfoInstance">
     <Container ID="MapContainer" Anchor ="C,T" Size ="240,160" Offset="0,50">
       <Image ID="MapImagePreview" Anchor ="C,T" Offset="0,0" Texture="Map_4LeafClover" TextureOffset="0,0"/>
@@ -84,5 +93,5 @@
       </Grid>
     </Container>
   </Instance>
-  
+  -->
 </Context>

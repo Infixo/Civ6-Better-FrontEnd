@@ -16,6 +16,8 @@
 			<File>ui/loadsavemenu_shared.lua</File>
 			<File>ui/mainmenu.lua</File>
 			<File>ui/mainmenu.xml</File>
+			<File>ui/mapselect.lua</File>
+			<File>ui/mapselect.xml</File>
 			<File>ui/playersetuplogic.lua</File>
 		</ImportFiles>
 		<ImportFiles id="BFE_FrontEnd_ImportFiles_2">
@@ -42,6 +44,8 @@
 		<File>ui/loadsavemenu_shared.lua</File>
 		<File>ui/mainmenu.lua</File>
 		<File>ui/mainmenu.xml</File>
+		<File>ui/mapselect.lua</File>
+		<File>ui/mapselect.xml</File>
 		<File>ui/playersetuplogic.lua</File>
 		<!-- InGame -->
 		<!--<File>ui/SaveGameMenu.lua</File>-->
