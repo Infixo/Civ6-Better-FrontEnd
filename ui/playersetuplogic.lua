@@ -30,6 +30,7 @@ g_victoryIcons = {
 	VICTORY_SCORE      = "[ICON_Turn]",
 	VICTORY_TECHNOLOGY = "[ICON_Science]",
 	VICTORY_DIPLOMATIC = "[ICON_FAVOR]", -- ICON_FAVOR_LARGE funny, it is not defined anywhere...
+	VICTORY_DEFAULT    = "[ICON_Checkmark]", -- 230518 support for scenarios
 }
 
 -------------------------------------------------------------------------------
@@ -739,17 +740,24 @@ Players:
 --]]
 
 local m_cachedVictories: table = {
-	["Players:StandardPlayers"]    = {},
-	["Players:Expansion1_Players"] = {},
-	["Players:Expansion2_Players"] = {},
+	["Players:StandardPlayers"] = {}, -- base game
 };
 
 -- 230516 #4 The relation between Ruleset and PlayerDomain is 1:1
 local m_playerDomainToRuleset: table = {
-	["Players:StandardPlayers"]    = "RULESET_STANDARD",
-	["Players:Expansion1_Players"] = "RULESET_EXPANSION_1",
-	["Players:Expansion2_Players"] = "RULESET_EXPANSION_2",
+	["Players:StandardPlayers"] = "RULESET_STANDARD", -- base game
 };
+
+-- 230518 add mappings for scenarios
+function InitializePlayerDomainToRulset()
+	local results: table = CachedQuery("SELECT Ruleset, Domain FROM RulesetDomainOverrides WHERE ParameterId = 'PlayerLeader'");
+	if results and #results > 0 then
+		for _,row in ipairs(results) do
+			m_playerDomainToRuleset[row.Domain] = row.Ruleset;
+		end
+	end
+end
+InitializePlayerDomainToRulset();
 
 function GetPlayerVictories(domain, leader_type)
 	--print("GetPlayerVictories", domain, leader_type);
@@ -760,6 +768,7 @@ function GetPlayerVictories(domain, leader_type)
 	end
 	
 	-- check if already in the cache
+	if m_cachedVictories[domain] == nil then m_cachedVictories[domain] = {}; end -- 230518 support scenarios
 	if m_cachedVictories[domain][leader_type] then
 		return m_cachedVictories[domain][leader_type][1], m_cachedVictories[domain][leader_type][2];
 	end
@@ -780,11 +789,11 @@ function GetPlayerVictories(domain, leader_type)
 			end
 			if not isVic then
 				table.insert(vicTypes, game.VictoryType);
-				vicIcons = vicIcons..g_victoryIcons[game.VictoryType];
+				vicIcons = vicIcons..( g_victoryIcons[game.VictoryType] and g_victoryIcons[game.VictoryType] or g_victoryIcons.VICTORY_DEFAULT ); -- 230518 support for scenarios
 			end
 		end
 	end
-	m_cachedVictories[leader_type] = {vicIcons, vicTypes};
+	m_cachedVictories[domain][leader_type] = {vicIcons, vicTypes}; -- 230518 fix storage place
 	return vicIcons, vicTypes;
 end
 
