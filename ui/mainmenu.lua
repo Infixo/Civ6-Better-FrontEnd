@@ -306,6 +306,9 @@ end
 
 -- ===========================================================================
 function GetCivRoyaleOfflineTT()
+	if (Network.IsAgeRestricted()) then
+		return Locale.Lookup("LOC_MULTIPLAYER_INTERNET_GAME_OFFLINE_AGE_TT");
+	end
 
 	if( Network.GetNetworkPlatform() == NetworkPlatform.NETWORK_PLATFORM_EOS ) then
 		return Locale.Lookup("LOC_EPIC_MULTIPLAYER_MATCHMAKE_CIVROYALE_OFFLINE_TT");
@@ -316,6 +319,9 @@ end
 
 -- ===========================================================================
 function GetPiratesOfflineTT()
+	if (Network.IsAgeRestricted()) then
+		return Locale.Lookup("LOC_MULTIPLAYER_INTERNET_GAME_OFFLINE_AGE_TT");
+	end
 
 	if( Network.GetNetworkPlatform() == NetworkPlatform.NETWORK_PLATFORM_EOS ) then
 		return Locale.Lookup("LOC_EPIC_MULTIPLAYER_MATCHMAKE_PIRATES_OFFLINE_TT");
@@ -326,6 +332,10 @@ end
 
 -- ===========================================================================
 function GetInternetGameOfflineTT()
+	if (Network.IsAgeRestricted()) then
+		return Locale.Lookup("LOC_MULTIPLAYER_INTERNET_GAME_OFFLINE_AGE_TT");
+	end
+
 	if( Network.GetNetworkPlatform() == NetworkPlatform.NETWORK_PLATFORM_EOS ) then
 		return Locale.Lookup("LOC_EPIC_MULTIPLAYER_INTERNET_GAME_OFFLINE_TT");
 	end
@@ -340,6 +350,7 @@ local InternetButtonOnlineStr : string = Locale.Lookup("LOC_MULTIPLAYER_INTERNET
 local InternetButtonOfflineStr : string = GetInternetGameOfflineTT();
 local CloudButtonTTStr : string = Locale.Lookup("LOC_MULTIPLAYER_CLOUD_GAME_TT");
 local CloudNotLoggedInTTStr : string = Locale.Lookup("LOC_MULTIPLAYER_CLOUD_GAME_NO_LOGIN_TT");
+local CloudNotAgeRestrictedTTStr : string = Locale.Lookup("LOC_MULTIPLAYER_CLOUD_GAME_NO_LOGIN_AGE_TT");																									
 local CloudButtonUnseenCompleteGameTTStr : string = Locale.Lookup("LOC_MULTIPLAYER_CLOUD_UNSEEN_COMPLETE_GAME_TT");
 local CloudButtonHaveTurnTTStr : string = Locale.Lookup("LOC_MULTIPLAYER_CLOUD_GAME_HAVE_TURN_TT");
 local CloudButtonGameReadyTTStr: string = Locale.Lookup("LOC_MULTIPLAYER_CLOUD_GAME_GAME_READY_TT");
@@ -599,10 +610,18 @@ function UpdateCrossPlayButton(buttonControl: table)
 			else
 				m_crossPlayButton.OptionButton:SetDisabled(true);
 				if (seenXPM == nil or seenXPM == 0) then
-					m_crossPlayButton.Top:SetToolTipString(Locale.Lookup("LOC_MULTIPLAYER_CROSSPLAY_NEW_GAME_OFFLINE_TT"));
+					if (Network.IsAgeRestricted()) then
+						m_crossPlayButton.Top:SetToolTipString(Locale.Lookup("LOC_MULTIPLAYER_INTERNET_GAME_OFFLINE_AGE_TT"));
+					else
+						m_crossPlayButton.Top:SetToolTipString(Locale.Lookup("LOC_MULTIPLAYER_CROSSPLAY_NEW_GAME_OFFLINE_TT"));
+					end
 					m_crossPlayButton.ButtonLabel:SetText(Locale.Lookup("LOC_MULTIPLAYER_CROSSPLAY_NEW_GAME_OFFLINE"));
 				else
-					m_crossPlayButton.Top:SetToolTipString(Locale.Lookup("LOC_MULTIPLAYER_CROSSPLAY_GAME_OFFLINE_TT"));
+					if (Network.IsAgeRestricted()) then
+						m_crossPlayButton.Top:SetToolTipString(Locale.Lookup("LOC_MULTIPLAYER_INTERNET_GAME_OFFLINE_AGE_TT"));
+					else
+						m_crossPlayButton.Top:SetToolTipString(Locale.Lookup("LOC_MULTIPLAYER_CROSSPLAY_GAME_OFFLINE_TT"));
+					end
 					m_crossPlayButton.ButtonLabel:SetText(Locale.Lookup("LOC_MULTIPLAYER_CROSSPLAY_GAME_OFFLINE"));
 				end
 				m_crossPlayButton.ButtonLabel:SetColorByName( "ButtonDisabledCS" );
@@ -644,16 +663,33 @@ function GetMatchMakeButtonUpdateFunction(cacheButtonControl :table, modGUIDStr 
 end
 
 function GetHowToButtonUpdateFunction(cacheButtonControl :table, modGUIDStr :string)
+-- This updates the state of the entire menu selection, the help button is just a sub-part of the control that is input
 	function CustomHowToUpdateFunction(buttonControl: table)
 		if (buttonControl ~=nil) then
 			cacheButtonControl = buttonControl;
 		end
 	
 		if(cacheButtonControl ~= nil) then
-			-- Is CivRoyale enabled?
+			-- Is the custom scenario (CivRoyale or Pirates) enabled?
 			local enabled = Modding.IsModEnabled( modGUIDStr );
 			cacheButtonControl.Top:SetHide(not enabled);
 			cacheButtonControl.HelpButton:SetHide(not enabled);
+
+			-- Might want to pass through the tooltip strings so we change change them based on the state of the internet service
+			-- like we do for the other menu options
+			if (enabled) then
+				if (Network.IsAgeRestricted()) then
+					-- We are going to set the text here, because we never change from age restricted to not
+					cacheButtonControl.Top:SetToolTipString(Locale.Lookup("LOC_MULTIPLAYER_INTERNET_GAME_OFFLINE_AGE_TT"));
+				end
+
+				if (Network.IsInternetLobbyServiceAvailable()) then
+					-- Should we also disable the help button?
+					cacheButtonControl.OptionButton:SetDisabled(false);
+				else
+					cacheButtonControl.OptionButton:SetDisabled(true);
+				end
+			end
 		end
 	end
 	return CustomHowToUpdateFunction;
@@ -666,27 +702,33 @@ function UpdateCloudGamesButton(buttonControl: table)
 	
 	-- Your turn in a cloud game?
 	if(m_cloudGamesButton ~= nil) then
-		local isFullyLoggedIn = FiraxisLive.IsFullyLoggedIn() and FiraxisLive.IsPlatformOrFullAccount();
-		if(not isFullyLoggedIn) then
+		if (Network.IsAgeRestricted()) then
 			m_cloudGamesButton.OptionButton:SetDisabled(true);
-			m_cloudGamesButton.Top:SetToolTipString(CloudNotLoggedInTTStr);
+			m_cloudGamesButton.Top:SetToolTipString(CloudNotAgeRestrictedTTStr);
 			m_cloudGamesButton.ButtonLabel:SetColorByName( "ButtonDisabledCS" );
-		elseif (m_cloudNotify ~= CloudNotifyTypes.CLOUDNOTIFY_NONE and m_cloudNotify ~= CloudNotifyTypes.CLOUDNOTIFY_ERROR) then
-			m_cloudGamesButton.OptionButton:SetDisabled(false);
-			local CloudTTStr = GetCloudButtonTTForNotify(m_cloudNotify);
-			m_cloudGamesButton.Top:SetToolTipString(CloudTTStr);
-			m_cloudGamesButton.ButtonLabel:SetText(Locale.Lookup("LOC_MULTIPLAYER_CLOUD_GAME_HAVE_CLOUD_NOTIFY"));
-			m_cloudGamesButton.ButtonLabel:SetColorByName( "ButtonCS" );
-		elseif (m_hasCloudUnseenComplete) then
-			m_cloudGamesButton.OptionButton:SetDisabled(false);
-			m_cloudGamesButton.Top:SetToolTipString(CloudButtonUnseenCompleteGameTTStr .. "[NEWLINE][NEWLINE]" .. CloudButtonTTStr);
-			m_cloudGamesButton.ButtonLabel:SetText(Locale.Lookup("LOC_MULTIPLAYER_CLOUD_UNSEEN_COMPLETE_GAME"));
-			m_cloudGamesButton.ButtonLabel:SetColorByName( "ButtonCS" );
 		else
-			m_cloudGamesButton.OptionButton:SetDisabled(false);
-			m_cloudGamesButton.Top:SetToolTipString(CloudButtonTTStr);
-			m_cloudGamesButton.ButtonLabel:SetText(Locale.Lookup("LOC_MULTIPLAYER_CLOUD_GAME"));
-			m_cloudGamesButton.ButtonLabel:SetColorByName( "ButtonCS" );
+			local isFullyLoggedIn = FiraxisLive.IsFullyLoggedIn() and FiraxisLive.IsPlatformOrFullAccount();
+			if(not isFullyLoggedIn) then
+				m_cloudGamesButton.OptionButton:SetDisabled(true);
+				m_cloudGamesButton.Top:SetToolTipString(CloudNotLoggedInTTStr);
+				m_cloudGamesButton.ButtonLabel:SetColorByName( "ButtonDisabledCS" );
+			elseif (m_cloudNotify ~= CloudNotifyTypes.CLOUDNOTIFY_NONE and m_cloudNotify ~= CloudNotifyTypes.CLOUDNOTIFY_ERROR) then
+				m_cloudGamesButton.OptionButton:SetDisabled(false);
+				local CloudTTStr = GetCloudButtonTTForNotify(m_cloudNotify);
+				m_cloudGamesButton.Top:SetToolTipString(CloudTTStr);
+				m_cloudGamesButton.ButtonLabel:SetText(Locale.Lookup("LOC_MULTIPLAYER_CLOUD_GAME_HAVE_CLOUD_NOTIFY"));
+				m_cloudGamesButton.ButtonLabel:SetColorByName( "ButtonCS" );
+			elseif (m_hasCloudUnseenComplete) then
+				m_cloudGamesButton.OptionButton:SetDisabled(false);
+				m_cloudGamesButton.Top:SetToolTipString(CloudButtonUnseenCompleteGameTTStr .. "[NEWLINE][NEWLINE]" .. CloudButtonTTStr);
+				m_cloudGamesButton.ButtonLabel:SetText(Locale.Lookup("LOC_MULTIPLAYER_CLOUD_UNSEEN_COMPLETE_GAME"));
+				m_cloudGamesButton.ButtonLabel:SetColorByName( "ButtonCS" );
+			else
+				m_cloudGamesButton.OptionButton:SetDisabled(false);
+				m_cloudGamesButton.Top:SetToolTipString(CloudButtonTTStr);
+				m_cloudGamesButton.ButtonLabel:SetText(Locale.Lookup("LOC_MULTIPLAYER_CLOUD_GAME"));
+				m_cloudGamesButton.ButtonLabel:SetColorByName( "ButtonCS" );
+			end
 		end
 	end
 end
@@ -964,12 +1006,14 @@ local m_MultiPlayerSubMenu :table = {
 								{label = "LOC_MULTIPLAYER_MATCHMAKE_PIRATES",	callback = GetOnMatchMakeFunction(OPTION_SEEN_PIRATES_INTRO, StartPiratesMatchMaking, LuaEvents.MainMenu_ShowPiratesIntro),	tooltip = "LOC_MULTIPLAYER_MATCHMAKE_PIRATES_TT", colorName = "PiratesButtonCS",  helpCallback = OnPiratesHowToPlay, helpTooltip = "LOC_MULTIPLAYER_HOWTOPLAY_PIRATES_TT", buttonState = GetHowToButtonUpdateFunction(m_howToPiratesControl, MOD_PIRATES_GUID)}
 							};
 
+--[[
 -- 230411 Move additional options into the main menu
---local m_AdditionalSubMenu :table = {
---								{label = "LOC_MAIN_MENU_MODS",					callback = OnMods,					tooltip = "LOC_MAIN_MENU_MODS_AND_DLC_TT"},
---								{label = "LOC_MAIN_MENU_HALL_OF_FAME",			callback = OnHallofFame,			tooltip = "LOC_MAIN_MENU_HALL_OF_FAME_TT"},
---								{label = "LOC_MAIN_MENU_CREDITS",				callback = OnCredits,				tooltip = "LOC_MAINMENU_CREDITS_TT"},
---							};
+local m_AdditionalSubMenu :table = {
+								{label = "LOC_MAIN_MENU_MODS",					callback = OnMods,					tooltip = "LOC_MAIN_MENU_MODS_AND_DLC_TT"},
+								{label = "LOC_MAIN_MENU_HALL_OF_FAME",			callback = OnHallofFame,			tooltip = "LOC_MAIN_MENU_HALL_OF_FAME_TT"},
+								{label = "LOC_MAIN_MENU_CREDITS",				callback = OnCredits,				tooltip = "LOC_MAINMENU_CREDITS_TT"},
+							};
+--]]
 
 local m_BenchmarkSubMenu :table = {
 								{label = "LOC_BENCHMARK_GRAPHICS",			callback = OnGraphicsBenchmark,		tooltip = "LOC_BENCHMARK_GRAPHICS_TT"},
@@ -1509,4 +1553,4 @@ function Initialize()
 end
 Initialize();
 
-print("BFE: Loaded mainmenu.lua");
+print("BFE: Loaded  mainmenu.lua");
