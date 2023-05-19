@@ -107,6 +107,7 @@
 											<Image Texture="Shell_MinimapOverlay" Size="252,147" Anchor="C,C"/>
 											<Label ID="NoMapDataLabel" Anchor="C,C" String="LOC_LOADSAVE_NO_MAP_DATA" Style="HeaderTextParchment16" Hidden="0"/>
 										</Container>
+										<!-- Infixo: removed unused code -->
 										<Container ID="Root" Size="parent,20" Anchor="L,B">
 											<Stack StackGrowth="Right" Anchor="C,T">
 												<Label ID="SelectedCurrentTurnLabel" Style="FontNormal14" ColorSet="BodyTextCool" FontStyle="stroke"/>

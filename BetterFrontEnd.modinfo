@@ -22,8 +22,8 @@
 		</ImportFiles>
 		<ImportFiles id="BFE_FrontEnd_ImportFiles_2">
 			<Properties><LoadOrder>1000003</LoadOrder></Properties> <!-- higher than YNAMP -->
-			<File>ui/advancedsetupbfe.lua</File>
-			<File>ui/advancedsetupbfe.xml</File>
+			<File>ui/AdvancedSetupBFE.lua</File>
+			<File>ui/AdvancedSetupBFE.xml</File>
 		</ImportFiles>
 	</FrontEndActions>
 	<!--
@@ -37,8 +37,8 @@
 	-->
 	<Files>
 		<!-- FronEnd -->
-		<File>ui/advancedsetupbfe.lua</File>
-		<File>ui/advancedsetupbfe.xml</File>
+		<File>ui/AdvancedSetupBFE.lua</File>
+		<File>ui/AdvancedSetupBFE.xml</File>
 		<File>ui/loadgamemenu.lua</File>
 		<File>ui/loadgamemenu.xml</File>
 		<File>ui/loadsavemenu_shared.lua</File>

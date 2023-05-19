@@ -18,7 +18,7 @@ local m_cloudNotify:number = CloudNotifyTypes.CLOUDNOTIFY_NONE;
 local m_hasCloudUnseenComplete:boolean = false; -- Do we have completed PlayByCloud games that we haven't seen yet?
 local m_checkedCloudNotify:boolean = false;	-- Have we checked for cloud notifications?
 local m_currentOptions:table = {};		--Track which main menu options are being displayed and selected. Indices follow the format of {optionControl:table, isSelected:boolean}
-local m_initialPause = 1.5;				--How long to wait before building the main menu options when the game first loads
+local m_initialPause = 0;				--How long to wait before building the main menu options when the game first loads
 local m_internetButton:table = nil;		--Cache internet button so it can be updated when online status events fire
 local m_crossPlayButton:table = nil;	--Cache crossplay button so it can be updated when online status events fire
 local m_multiplayerButton:table = nil;	--Cache multiplayer button so it can be updated if a new cloud turn comes in.
@@ -37,7 +37,7 @@ g_LogoMovie = nil;		-- Custom Logo movie override.
 -- ===========================================================================
 --	Constants
 -- ===========================================================================
-local PAUSE_INCREMENT				:number = .18;			--How long to wait (in seconds) between main menu flyouts - length of the menu cascade
+local PAUSE_INCREMENT				:number = .1;			--How long to wait (in seconds) between main menu flyouts - length of the menu cascade
 local TRACK_PADDING					:number = 40;			--The amount of Y pixels to add to the track on top of the list height
 local OPTION_SEEN_CIVROYALE_INTRO	:string = "HasSeenCivRoyaleIntro";	-- Option key for having seen the CivRoyale How to Play screen.
 local OPTION_SEEN_PIRATES_INTRO		:string = "HasSeenPiratesIntro";	-- Option key for having seen the Pirates How to Play screen.
@@ -1120,7 +1120,7 @@ function BuildMenu(menuOptions:table)
 		option.LabelAlphaAnim:SetToBeginning();
 		option.LabelAlphaAnim:Play();
 		-- The label begin its alpha animation slightly after the flag begins to fly out
-		option.LabelAlphaAnim:SetPauseTime(pauseAccumulator + .2);
+		option.LabelAlphaAnim:SetPauseTime(pauseAccumulator + PAUSE_INCREMENT);
 		option.OptionButton:RegisterCallback( Mouse.eLClick, function() 
 																--If a submenu exists, specify the index and pass the submenu along to the callback
 																if (menuOption.submenu ~= nil) then 

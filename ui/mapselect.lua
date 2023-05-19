@@ -163,4 +163,4 @@ function Initialize()
 end
 Initialize();
 
-print("BFE: Loaded mapselect.lua");
+print("BFE: Loaded  mapselect.lua");

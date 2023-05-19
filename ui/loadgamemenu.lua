@@ -354,7 +354,8 @@ function OnCloudCheck( )
 	UpdateActionButtonState();
 end
 
-----------------------------------------------------------------        
+----------------------------------------------------------------
+-- 230518 #8 Official content checkbox handler
 ----------------------------------------------------------------
 function OnOfficialCheck()
 	g_ShowOfficialOnly = not g_ShowOfficialOnly;
@@ -604,4 +605,4 @@ function Initialize()
 end
 Initialize();
 
-print("BFE: Loaded loadgamemenu.lua");
+print("BFE: Loaded  loadgamemenu.lua");

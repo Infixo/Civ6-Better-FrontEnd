@@ -1,4 +1,4 @@
-print("BFE: Loading advancedsetupbfe.lua from Better FrontEnd (UI) v1.0");
+print("BFE: Loading AdvancedSetupBFE.lua from Better FrontEnd (UI) v1.0");
 
 -- ===========================================================================
 -- Better FrontEnd by Infixo
@@ -278,4 +278,4 @@ function InitializeBFE()
 end
 InitializeBFE();
 
-print("BFE: Loaded advancedsetup.lua");
+print("BFE: Loaded  AdvancedSetupBFE.lua");

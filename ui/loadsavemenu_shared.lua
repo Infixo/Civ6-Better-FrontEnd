@@ -45,20 +45,6 @@ g_DontUpdateFileName = false;
 g_SearchQuery = nil; -- 230411 search pattern
 
 ----------------------------------------------------------------        
--- debug routine - prints a table, and tables inside recursively (up to 3 levels)
-----------------------------------------------------------------        
-function dshowtable(tTable:table, iLevel:number)
-	local level:number = 0;
-	if iLevel ~= nil then level = iLevel; end
-	for k,v in pairs(tTable) do
-		if level == 0 then     print(                                   k, type(v), tostring(v));
-		elseif level == 1 then print(                           ":...", k, type(v), tostring(v));
-		else                   print(string.rep(":  ",level-1), ":...", k, type(v), tostring(v)); end
-		if type(v) == "table" and level < 3 then dshowtable(v, level+1); end
-	end
-end
-
-----------------------------------------------------------------        
 -- File Name Handling
 ----------------------------------------------------------------
 
@@ -201,7 +187,6 @@ function SetupSortPulldown()
 end
 
 
-
 ---------------------------------------------------------------------------
 -- Tuner Pulldown setup
 -- Must exist below callback function names
@@ -212,21 +197,8 @@ local m_TunerOptions = {
 	{"{LOC_LOADSAVE_TUNER_ACTIVE_TITLE} {LOC_NO}",  3},
 };
 
-
 ---------------------------------------------------------------------------
 function RefreshTunerPulldown()
-	--[[
-	if g_GameType == SaveTypes.WORLDBUILDER_MAP then
-		sortStyle = Options.GetUserOption("Interface", "WorldBuilderMapBrowseSortDefault");
-	else
-		sortStyle = Options.GetUserOption("Interface", "SaveGameBrowseSortDefault");
-	end
-
-	-- Make sure it is valid
-	if sortStyle ~= 1 and sortStyle ~= 2 then
-		sortStyle = 1;
-	end
-	--]]
 	Controls.TunerPullDown:GetButton():LocalizeAndSetText(m_TunerOptions[g_ShowTuner][1]);
 end
 
@@ -242,14 +214,6 @@ function SetupTunerPulldown()
 		controlTable.Button:RegisterCallback(Mouse.eLClick, function()
 			tunerPulldown:GetButton():LocalizeAndSetText( v[1] );
 			g_ShowTuner = v[2];
-			--[[
-			-- Store the default
-			if g_GameType == SaveTypes.WORLDBUILDER_MAP then
-				Options.SetUserOption("Interface", "WorldBuilderMapBrowseSortDefault", v[3]);
-			else
-				Options.SetUserOption("Interface", "SaveGameBrowseSortDefault", v[3]);
-			end
-	        Options.SaveOptions();--]]
 			RebuildFileList();
 		end);
 	
@@ -258,7 +222,6 @@ function SetupTunerPulldown()
 
 	RefreshTunerPulldown();
 end
-
 
 
 ----------------------------------------------------------------        
@@ -998,7 +961,6 @@ end
 
 --230518 #8 helper to find out if the file has community content required or not
 function IsFileOfficialOnly(fileInfo: table)
-	--print("IsFileOfficialOnly", fileInfo.Name);
 	-- Configuration files depend on the Enabled mods while other types depend on Required mods.
 	local mods: table = nil;
 	if g_FileType == SaveFileTypes.GAME_CONFIGURATION then mods = fileInfo.EnabledMods or {};
@@ -1196,53 +1158,6 @@ function SetupFileList()
 
 end
 
-
---[[ g_FileList single entry example
-LoadGameMenu: FileType	0
-LoadGameMenu: MapScriptName	{"LOC_MAP_CONTINENTS":[{"locale":"en_US","text":"Continents"},{"locale":"fr_FR","text":"Continents"},{"locale":"de_DE","text":"Kontinente"},{"locale":"it_IT","text":"Continenti"},{"locale":"es_ES","text":"Continentes"},{"locale":"ja_JP","text":"大陸"},{"locale":"ru_RU","text":"Континенты"},{"locale":"pl_PL","text":"Kontynenty"},{"locale":"ko_KR","text":"대륙"},{"locale":"zh_Hant_HK","text":"大陸"},{"locale":"zh_Hans_CN","text":"大陆"},{"locale":"pt_BR","text":"Continentes"}]}
-LoadGameMenu: CurrentTurn	121
-LoadGameMenu: MapSizeName	{"LOC_MAPSIZE_SMALL_NAME":[{"locale":"en_US","text":"Small"},{"locale":"fr_FR","text":"Petite"},{"locale":"de_DE","text":"Klein"},{"locale":"it_IT","text":"Piccola"},{"locale":"es_ES","text":"Pequeño"},{"locale":"ja_JP","text":"小"},{"locale":"ru_RU","text":"Маленькая"},{"locale":"pl_PL","text":"Mała"},{"locale":"ko_KR","text":"소형"},{"locale":"zh_Hant_HK","text":"小"},{"locale":"zh_Hans_CN","text":"小"},{"locale":"pt_BR","text":"Pequeno"}]}
-LoadGameMenu: HostCivilizationName	{"LOC_CIVILIZATION_MACEDON_NAME":[{"locale":"en_US","text":"Macedon"},{"locale":"fr_FR","text":"Macédoine","plurality":"1","gender":"feminine"},{"locale":"de_DE","text":"Makedonien|Makedonien|Makedonien|Makedoniens|Makedonien","plurality":"1","gender":"neuter:no_article"},{"locale":"it_IT","text":"Macedonia|della Macedonia|alla Macedonia|la Macedonia|dalla Macedonia","plurality":"1","gender":"feminine"},{"locale":"es_ES","text":"Macedonia","plurality":"1","gender":"feminine"},{"locale":"ja_JP","text":"マケドニア"},{"locale":"ru_RU","text":"Македония|Македонии|Македонии|Македонию|Македонией|Македонии","plurality":"1","gender":"feminine"},{"locale":"pl_PL","text":"Macedonia|Macedonii|Macedonii|Macedonię|Macedonią|Macedonii|Macedonia|Macedonii|Macedonii|Macedonię|Macedonią|Macedonii","plurality":"1","gender":"feminine"},{"locale":"ko_KR","text":"마케도니아"},{"locale":"zh_Hant_HK","text":"馬其頓"},{"locale":"zh_Hans_CN","text":"马其顿"},{"locale":"pt_BR","text":"Macedônia","plurality":"1","gender":"feminine"}]}
-LoadGameMenu: RequiredMods	table: 000000001EB27BC0
-LoadGameMenu: Slot	0
-LoadGameMenu: HostEra	ERA_MEDIEVAL
-LoadGameMenu: IsDirectory	false
-LoadGameMenu: MapSize	MAPSIZE_SMALL
-LoadGameMenu: SavedByVersion	1.0.12.41 (887696)
-LoadGameMenu: EnabledMods	table: 000000001EB2C170
-LoadGameMenu: DisplaySaveTime	3/29/23, 3:35 AM
-LoadGameMenu: Name	ALEXANDER 121 med.Civ6Save
-LoadGameMenu: Type	1
-LoadGameMenu: GameSpeed	GAMESPEED_STANDARD
-LoadGameMenu: RulesetName	{"LOC_EXPANSION2_NAME":[{"locale":"en_US","text":"Expansion: Gathering Storm"},{"locale":"fr_FR","text":"Extension : Gathering Storm"},{"locale":"de_DE","text":"Erweiterung: Gathering Storm"},{"locale":"it_IT","text":"Espansione: Gathering Storm"},{"locale":"es_ES","text":"Expansión: Gathering Storm"},{"locale":"ja_JP","text":"拡張パック: 嵐の訪れ"},{"locale":"ru_RU","text":"Дополнение: Gathering Storm"},{"locale":"pl_PL","text":"Rozszerzenie: Gathering Storm"},{"locale":"ko_KR","text":"확장팩: 몰려드는 폭풍"},{"locale":"zh_Hant_HK","text":"資料片：風雲際會"},{"locale":"zh_Hans_CN","text":"资料片：风云变幻"},{"locale":"pt_BR","text":"Expansão: Gathering Storm"}]}
-LoadGameMenu: SaveTime	1680053745
-LoadGameMenu: Ruleset	RULESET_EXPANSION_2
-LoadGameMenu: GameSpeedName	{"LOC_GAMESPEED_STANDARD_NAME":[{"locale":"en_US","text":"Standard"},{"locale":"fr_FR","text":"Normale"},{"locale":"de_DE","text":"Standard"},{"locale":"it_IT","text":"Standard"},{"locale":"es_ES","text":"Estándar"},{"locale":"ja_JP","text":"標準"},{"locale":"ru_RU","text":"Стандартная"},{"locale":"pl_PL","text":"Zwykła"},{"locale":"ko_KR","text":"보통"},{"locale":"zh_Hant_HK","text":"標準"},{"locale":"zh_Hans_CN","text":"标准"},{"locale":"pt_BR","text":"Padrão"}]}
-LoadGameMenu: Id	8
-LoadGameMenu: EnabledGameModes	{
-    "modes": [
-        {
-            "name": "{\"LOC_GAMEMODE_BARBARIAN_CLANS_NAME\":[{\"locale\":\"en_US\",\"text\":\"Barbarian Clans Mode\"},{\"locale\":\"fr_FR\",\"text\":\"Mode Clans barbares\"},{\"locale\":\"de_DE\",\"text\":\"Barbaren-Clans-Modus\"},{\"locale\":\"it_IT\",\"text\":\"Modalità Clan di barbari\"},{\"locale\":\"es_ES\",\"text\":\"Modo Clanes bárbaros\"},{\"locale\":\"ja_JP\",\"text\":\"「蛮族の部族」モード\"},{\"locale\":\"ru_RU\",\"text\":\"Режим «Варварские кланы»\"},{\"locale\":\"pl_PL\",\"text\":\"Tryb barbarzyńskich klanów\"},{\"locale\":\"ko_KR\",\"text\":\"야만인 부족 모드\"},{\"locale\":\"zh_Hant_HK\",\"text\":\"蠻族部族模式\"},{\"locale\":\"zh_Hans_CN\",\"text\":\"蛮族氏族模式\"},{\"locale\":\"pt_BR\",\"text\":\"Modo Clãs Bárbaros\"}]}"
-        }
-    ]
-}
-LoadGameMenu: HostCivilization	CIVILIZATION_MACEDON
-LoadGameMenu: HostBackgroundColorValue	-16656137
-LoadGameMenu: IsQuicksave	false
-LoadGameMenu: IsPrevious	false
-LoadGameMenu: HostEraName	{"LOC_ERA_MEDIEVAL_NAME":[{"locale":"en_US","text":"Medieval Era"},{"locale":"fr_FR","text":"Ère médiévale","plurality":"1","gender":"feminine:vowel"},{"locale":"de_DE","text":"Mittelalter|Mittelalter|Mittelalter|Mittelalters|Mittelalter","plurality":"1","gender":"neuter"},{"locale":"it_IT","text":"Epoca medievale"},{"locale":"es_ES","text":"Época Medieval","plurality":"1","gender":"feminine"},{"locale":"ja_JP","text":"中世"},{"locale":"ru_RU","text":"Средневековье|Средневековья|Средневековью|Средневековье|Средневековьем|Средневековье","plurality":"1","gender":"neuter"},{"locale":"pl_PL","text":"Średniowiecze|Średniowiecza|Średniowieczu|Średniowiecze|Średniowieczem|Średniowieczu|średniowiecze|średniowiecza|średniowieczu|średniowiecze|średniowieczem|średniowieczu","plurality":"1","gender":"neuter"},{"locale":"ko_KR","text":"중세 시대"},{"locale":"zh_Hant_HK","text":"中世紀"},{"locale":"zh_Hans_CN","text":"中世纪"},{"locale":"pt_BR","text":"Era Medieval","plurality":"1","gender":"feminine"}]}
-LoadGameMenu: HostLeaderName	{"LOC_LEADER_ALEXANDER_NAME":[{"locale":"en_US","text":"Alexander"},{"locale":"fr_FR","text":"Alexandre","plurality":"1","gender":"masculine:no_article"},{"locale":"de_DE","text":"Alexander","plurality":"1","gender":"masculine:no_article"},{"locale":"it_IT","text":"Alessandro|di Alessandro|ad Alessandro|Alessandro|da Alessandro","plurality":"1","gender":"masculine"},{"locale":"es_ES","text":"Alejandro","plurality":"1","gender":"masculine"},{"locale":"ja_JP","text":"アレキサンドロス"},{"locale":"ru_RU","text":"Александр|Александра|Александру|Александра|Александром|Александре","plurality":"1","gender":"masculine"},{"locale":"pl_PL","text":"Aleksander|Aleksandra|Aleksandrowi|Aleksandra|Aleksandrem|Aleksandrze|Aleksander|Aleksandra|Aleksandrowi|Aleksandra|Aleksandrem|Aleksandrze","plurality":"1","gender":"masculine"},{"locale":"ko_KR","text":"알렉산더"},{"locale":"zh_Hant_HK","text":"亞歷山大"},{"locale":"zh_Hans_CN","text":"亚历山大"},{"locale":"pt_BR","text":"Alexandre","plurality":"1","gender":"masculine"}]}
-LoadGameMenu: HostDifficultyName	{"LOC_DIFFICULTY_PRINCE_NAME":[{"locale":"en_US","text":"Prince"},{"locale":"fr_FR","text":"Prince"},{"locale":"de_DE","text":"Prinz"},{"locale":"it_IT","text":"Principe"},{"locale":"es_ES","text":"Príncipe","plurality":"1","gender":"masculine"},{"locale":"ja_JP","text":"王子"},{"locale":"ru_RU","text":"Князь|князя|князю|князя|князем|князе","plurality":"1","gender":"masculine"},{"locale":"pl_PL","text":"Książę|Księcia|Księciu|Księcia|Księciem|Księciu|książę|księcia|księciu|księcia|księciem|księciu","plurality":"1","gender":"masculine"},{"locale":"ko_KR","text":"왕자"},{"locale":"zh_Hant_HK","text":"王子"},{"locale":"zh_Hans_CN","text":"王子"},{"locale":"pt_BR","text":"Príncipe","plurality":"1","gender":"masculine"}]}
-LoadGameMenu: HostDifficulty	DIFFICULTY_PRINCE
-LoadGameMenu: Location	1
-LoadGameMenu: HostForegroundColorValue	-5329234
-LoadGameMenu: HostLeader	LEADER_ALEXANDER
-LoadGameMenu: IsAutosave	false
-LoadGameMenu: Path	D:/Users/Grzegorz/Documents/My Games/Sid Meier's Civilization VI/Saves/Single/ALEXANDER 121 med.Civ6Save
-LoadGameMenu: AccountReference	0
-LoadGameMenu: TunerActive true
---]]
-
 ----------------------------------------------------------------        
 -- The callback for file queries
 function OnFileListQueryResults( fileList : table, id : number )
@@ -1277,6 +1192,7 @@ end
 function SetDontUpdateFileName( newValue )
 	g_DontUpdateFileName = newValue;
 end
+
 
 ----------------------------------------------------------------        
 -- 230411 Search bar support
@@ -1313,4 +1229,4 @@ function RefreshFileListWithFilter()
 	end
 end
 
-print("BFE: Loaded loadsavemenu_shared.lua");
+print("BFE: Loaded  loadsavemenu_shared.lua");

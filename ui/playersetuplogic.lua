@@ -34,20 +34,6 @@ g_victoryIcons = {
 }
 
 -------------------------------------------------------------------------------
--- Debug routine - prints a table, and tables inside recursively (up to 5 levels)
--------------------------------------------------------------------------------
-function dshowtable(tTable:table, iLevel:number)
-	local level:number = 0;
-	if iLevel ~= nil then level = iLevel; end
-	for k,v in pairs(tTable) do
-		if level == 0 then     print(                                    k, type(v), tostring(v));
-		elseif level == 1 then print(                            ":...", k, type(v), tostring(v));
-		else                   print(string.rep(":   ",level-1)..":...", k, type(v), tostring(v)); end
-		if type(v) == "table" and level < 5 then dshowtable(v, level+1); end
-	end
-end
-
--------------------------------------------------------------------------------
 -- Parameter Hooks
 -------------------------------------------------------------------------------
 function Player_ReadParameterValues(o, parameter)
@@ -708,36 +694,7 @@ function GetPlayerInfo(domain, leader_type)
 	};
 end
 
--- 230416 victories data from HallofFame
--- HallofFame.GetGames is THE function to call
---[[
- GameSummaries: GameId	27
- GameSummaries: LastPlayed	1591647513
- GameSummaries: Ruleset	RULESET_EXPANSION_2
- GameSummaries: TurnCount	325
- GameSummaries: StartEraType	ERA_ANCIENT
- GameSummaries: GameSpeedType	GAMESPEED_STANDARD
- GameSummaries: Players	table: 000000001E46F3D0
- GameSummaries: Map	{4873eb62-8ccc-4574-b784-dda455e74e68}Maps/EarthMaps/EarthStandard_XP2.Civ6Map
- GameSummaries: StartTurn	1
- GameSummaries: VictoryType	VICTORY_TECHNOLOGY  // table Victories  
- GameSummaries: VictorTeamId	0
- GameSummaries: MapSizeType	MAPSIZE_STANDARD
- GameSummaries: GameMode	-379035929
-Players:
- GameSummaries: PlayerId	0
- GameSummaries: DifficultyType	DIFFICULTY_DEITY
- GameSummaries: LeaderType	LEADER_LADY_SIX_SKY
- GameSummaries: CivilizationName	Maya
- GameSummaries: Score	1129
- GameSummaries: IsLocal	true
- GameSummaries: PlayerObjectId	2110
- GameSummaries: LeaderName	Lady Six Sky
- GameSummaries: CivilizationType	CIVILIZATION_MAYA
- GameSummaries: IsMajor	true
- GameSummaries: TeamId	0
- GameSummaries: IsHuman	true
---]]
+-- 230416 Victories data from the HallofFame
 
 local m_cachedVictories: table = {
 	["Players:StandardPlayers"] = {}, -- base game
@@ -1302,7 +1259,7 @@ function SetupLeaderPulldown(
 				info.PlayerColorIndex = colorIndex;
 				
 				m_currentInfo = info;
-				-- 230416 update victories also
+				-- 230416 #1 Victories feature
 				v.VictoryIcons, v.VictoryTypes = GetPlayerVictories(v.Domain, v.Value);
 			end
 
@@ -1319,7 +1276,7 @@ function SetupLeaderPulldown(
 						local err = v.InvalidReason or "LOC_SETUP_ERROR_INVALID_OPTION";
 						caption = caption .. "[NEWLINE][COLOR_RED](" .. Locale.Lookup(err) .. ")[ENDCOLOR]";
 					end
-					-- 230416 victories feature
+					-- 230416 #1 Victories feature
 					if v.VictoryIcons and v.VictoryIcons ~= "" then
 						caption = caption.." "..v.VictoryIcons;
 					end
@@ -1387,8 +1344,8 @@ function SetupLeaderPulldown(
 
 			if(refresh) then
 				instanceManager:ResetInstances();
-				g_playerInstances = {}; -- 230402 search bar
-				g_leaderParameters = {}; -- 230416 search feature
+				g_playerInstances = {}; -- 230402 #4 Search feature
+				g_leaderParameters = {}; -- 230416 #4 Search feature
 
 				-- Avoid creating call back for each value.
 				local hasPlacard = tooltipControls.HasLeaderPlacard;
@@ -1398,30 +1355,21 @@ function SetupLeaderPulldown(
 
 				for i,v in ipairs(values) do
 				
-					-- 230416 fetch data about victories and add to the table for later
+					-- 230416 #1 Fetch data about victories and add to the table for later
 					v.VictoryIcons, v.VictoryTypes = GetPlayerVictories(v.Domain, v.Value); -- this is called many times for the same leader
 					g_leaderParameters[v.Value] = v;
-				--[[
-AdvancedSetup: Domain	Players:Expansion2_Players
-AdvancedSetup: QueryId	51
-AdvancedSetup: SortIndex	100
-AdvancedSetup: RawDescription	LOC_TRAIT_LEADER_TO_WORLDS_END_DESCRIPTION
-AdvancedSetup: QueryIndex	32
-AdvancedSetup: Value	LEADER_ALEXANDER
-AdvancedSetup: Name	Alexander
-AdvancedSetup: RawName	LOC_LEADER_ALEXANDER_NAME
-				--]]
+					
 					local icons = GetPlayerIcons(v.Domain, v.Value);
 
 					local entry = instanceManager:GetInstance();
-					table.insert(g_playerInstances, entry); -- 230412 #4 search bar, store the control
+					table.insert(g_playerInstances, entry); -- 230412 #4 Search bar, store the control
 				
 					local caption = v.Name;
 					if(v.Invalid) then 
 						local err = v.InvalidReason or "LOC_SETUP_ERROR_INVALID_OPTION";
 						caption = caption .. "[NEWLINE][COLOR_RED](" .. Locale.Lookup(err) .. ")[ENDCOLOR]";
 					end
-					-- 230416 victories feature
+					-- 230416 #1 Victories feature
 					if v.VictoryIcons ~= "" then
 						caption = caption.." "..v.VictoryIcons;
 					end
@@ -1620,4 +1568,4 @@ function GameSetup_ConfigurationChanged()
 	GameSetup_RefreshParameters();
 end
 
-print("BFE: Loaded playersetuplogic.lua");
+print("BFE: Loaded  playersetuplogic.lua");
